@@ -29,6 +29,8 @@ export default function Login() {
       if (res.user.role === "admin") navigate("/admin/dashboard");
       else if (res.user.role === "scorer") navigate("/scorer/dashboard");
       else navigate("/viewer/dashboard"); // default viewer
+    }else{
+      alert(res.message || "Login failed")
     }
   };
 
@@ -39,7 +41,11 @@ export default function Login() {
         onClose={() => setShowModal(false)}
       />
 
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div
+        className="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: "url('src/assets/auth-bg.jpg')" }}
+      >
+          <div className="absolute inset-0 bg-black/40 pointer-events-none"></div>
         <form
           onSubmit={submit}
           className="bg-white p-6 rounded-lg shadow-lg w-96"

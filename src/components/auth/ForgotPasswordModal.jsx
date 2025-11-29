@@ -1,7 +1,8 @@
 import { useState } from "react";
+import api from "../../services/api";
 
 const ForgotPasswordModal = ({ isOpen, onClose }) => {
-  const [step, setStep] = useState(1); // 1: email → 2: otp → 3: reset password
+  const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -11,61 +12,41 @@ const ForgotPasswordModal = ({ isOpen, onClose }) => {
 
   if (!isOpen) return null;
 
-  // ------------------- API FUNCTIONS ----------------------
-
-  // STEP 1: Send OTP
+  // STEP 1 — Send OTP
   const handleSendOtp = async () => {
     setLoading(true);
     setMessage("");
 
-    try {
-      const res = await fetch("/api/auth/forgot-password/send-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
+    const res = await api.sendOtp(email);
 
-      const data = await res.json();
-
-      if (!res.ok) throw new Error(data.message);
-
+    if (res.message === "OTP sent to your email") {
       setMessage("OTP sent successfully!");
       setStep(2);
-
-    } catch (err) {
-      setMessage(err.message);
+    } else {
+      setMessage(res.message || "Something went wrong");
     }
 
     setLoading(false);
   };
 
-  // STEP 2: Verify OTP
+  // STEP 2 — Verify OTP
   const handleVerifyOtp = async () => {
     setLoading(true);
     setMessage("");
 
-    try {
-      const res = await fetch("/api/auth/forgot-password/verify-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, otp }),
-      });
+    const res = await api.verifyOtp(email, otp);
 
-      const data = await res.json();
-
-      if (!res.ok) throw new Error(data.message);
-
+    if (res.message === "OTP verified") {
       setMessage("OTP verified!");
       setStep(3);
-
-    } catch (err) {
-      setMessage(err.message);
+    } else {
+      setMessage(res.message || "Invalid OTP");
     }
 
     setLoading(false);
   };
 
-  // STEP 3: Reset Password
+  // STEP 3 — Reset Password
   const handleResetPassword = async () => {
     setMessage("");
 
@@ -74,7 +55,6 @@ const ForgotPasswordModal = ({ isOpen, onClose }) => {
       return;
     }
 
-    // Password validation
     const passRegex =
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
@@ -87,28 +67,19 @@ const ForgotPasswordModal = ({ isOpen, onClose }) => {
 
     setLoading(true);
 
-    try {
-      const res = await fetch("/api/auth/forgot-password/reset", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, newPassword }),
-      });
+    const res = await api.resetPassword(email, newPassword);
 
-      const data = await res.json();
-
-      if (!res.ok) throw new Error(data.message);
-
-      setMessage("Password reset successful! Redirecting...");
+    if (res.message === "Password reset successful") {
+      setMessage("Password updated successfully!");
       setTimeout(() => onClose(), 1500);
-
-    } catch (err) {
-      setMessage(err.message);
+    } else {
+      setMessage(res.message || "Something went wrong");
     }
 
     setLoading(false);
   };
 
-  // Close & reset all state
+  // RESET UI
   const handleClose = () => {
     setStep(1);
     setEmail("");
@@ -119,67 +90,64 @@ const ForgotPasswordModal = ({ isOpen, onClose }) => {
     onClose();
   };
 
-  // --------------------- UI -------------------------
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-white w-full max-w-md p-6 rounded-xl shadow-xl animate-fadeIn">
-        <h2 className="text-2xl font-bold text-center mb-4">
-          Forgot Password
-        </h2>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-white w-full max-w-md p-6 rounded-xl shadow-xl">
+        <h2 className="text-2xl font-bold text-center mb-4">Forgot Password</h2>
 
         {message && (
-          <p className="text-center text-red-500 text-sm mb-2">{message}</p>
+          <p className="text-center text-red-500 text-sm mb-3">{message}</p>
         )}
 
-        {/* STEP 1 — Enter Email */}
+        {/* STEP 1 — Email */}
         {step === 1 && (
           <>
-            <label className="block text-sm mb-1 font-medium">Email</label>
+            <label className="block text-sm font-medium mb-1">Email</label>
             <input
               type="email"
               className="w-full border rounded-lg px-3 py-2 mb-4"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your registered email"
+              placeholder="Enter your email"
             />
 
             <button
               onClick={handleSendOtp}
               disabled={loading}
-              className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
+              className="w-full bg-blue-600 text-white py-2 rounded-lg cursor-pointer"
             >
               {loading ? "Sending..." : "Send OTP"}
             </button>
           </>
         )}
 
-        {/* STEP 2 — Enter OTP */}
+        {/* STEP 2 — OTP */}
         {step === 2 && (
           <>
-            <label className="block text-sm mb-1 font-medium">Enter OTP</label>
+            <label className="block text-sm font-medium mb-1">Enter OTP</label>
             <input
               type="text"
               maxLength="6"
-              className="w-full border rounded-lg px-3 py-2 mb-4 tracking-widest text-center"
+              className="w-full border rounded-lg px-3 py-2 mb-4 text-center tracking-widest"
               value={otp}
               onChange={(e) => setOtp(e.target.value)}
-              placeholder="6-digit OTP"
+              placeholder="Enter 6-digit OTP"
             />
 
             <button
               onClick={handleVerifyOtp}
               disabled={loading}
-              className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700"
+              className="w-full bg-green-600 text-white py-2 rounded-lg cursor-pointer"
             >
               {loading ? "Verifying..." : "Verify OTP"}
             </button>
           </>
         )}
 
-        {/* STEP 3 — Reset Password */}
+        {/* STEP 3 — New Password */}
         {step === 3 && (
           <>
-            <label className="block text-sm mb-1 font-medium">
+            <label className="block text-sm font-medium mb-1">
               New Password
             </label>
             <input
@@ -190,7 +158,7 @@ const ForgotPasswordModal = ({ isOpen, onClose }) => {
               placeholder="Enter new password"
             />
 
-            <label className="block text-sm mb-1 font-medium">
+            <label className="block text-sm font-medium mb-1">
               Confirm Password
             </label>
             <input
@@ -198,22 +166,21 @@ const ForgotPasswordModal = ({ isOpen, onClose }) => {
               className="w-full border rounded-lg px-3 py-2 mb-4"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Confirm new password"
+              placeholder="Confirm password"
             />
 
             <button
               onClick={handleResetPassword}
               disabled={loading}
-              className="w-full bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700"
+              className="w-full bg-purple-600 text-white py-2 rounded-lg cursor-pointer"
             >
               {loading ? "Updating..." : "Reset Password"}
             </button>
           </>
         )}
 
-        {/* FOOTER */}
         <button
-          className="w-full text-center text-gray-600 mt-4 text-sm underline"
+          className="w-full text-center text-gray-600 mt-4 text-sm underline cursor-pointer"
           onClick={handleClose}
         >
           Cancel & Close
@@ -224,3 +191,4 @@ const ForgotPasswordModal = ({ isOpen, onClose }) => {
 };
 
 export default ForgotPasswordModal;
+

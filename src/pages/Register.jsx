@@ -39,14 +39,19 @@ export default function Register() {
 
     const res = await api.register(form);
     if (res.success) {
+      alert("Registration successful! Please login.");
       navigate("/login");
     } else {
-      alert(res.message);
+      alert(res.message || "Registration failed");
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+    <div
+      className="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat"
+      style={{ backgroundImage: "url('src/assets/auth-bg.jpg')" }}
+    >
+       <div className="absolute inset-0 bg-black/40"></div>
       <form
         onSubmit={handleSubmit}
         className="bg-white p-6 rounded-lg shadow-lg w-96"
