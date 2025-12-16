@@ -30,8 +30,8 @@ export default function Login() {
       if (res.user.role === "admin") navigate("/admin/dashboard");
       else if (res.user.role === "scorer") navigate("/scorer/dashboard");
       else navigate("/viewer/dashboard"); // default viewer
-    }else{
-      alert(res.message || "Login failed")
+    } else {
+      alert(res.message || "Login failed");
     }
   };
 
@@ -44,9 +44,9 @@ export default function Login() {
 
       <div
         className="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: "url('src/assets/auth-bg.jpg')" }}
+        style={{ backgroundImage: "url('/auth-bg.jpg')" }}
       >
-          <div className="absolute inset-0 bg-black/40 pointer-events-none"></div>
+        <div className="absolute inset-0 bg-black/40 pointer-events-none"></div>
         <form
           onSubmit={submit}
           className="bg-white p-6 rounded-lg shadow-lg w-96"
@@ -69,9 +69,7 @@ export default function Login() {
             className="w-full mb-3 px-3 py-2 border rounded"
           />
 
-          <button
-            className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700 cursor-pointer"
-          >
+          <button className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700 cursor-pointer">
             Login
           </button>
 
@@ -92,15 +90,14 @@ export default function Login() {
             </Link>
           </div>
 
-          <Link to="/" className="block mt-3 text-blue-500 hover:text-blue-600 cursor-pointer">
+          <Link
+            to="/"
+            className="block mt-3 text-blue-500 hover:text-blue-600 cursor-pointer"
+          >
             Back to Home
           </Link>
-
         </form>
       </div>
     </>
   );
 }
-
-
-
