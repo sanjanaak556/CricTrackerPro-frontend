@@ -49,7 +49,7 @@ export default function Register() {
   return (
     <div
       className="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat"
-      style={{ backgroundImage: "url('src/assets/auth-bg.jpg')" }}
+      style={{ backgroundImage: "url('/auth-bg.jpg')" }}
     >
        <div className="absolute inset-0 bg-black/40"></div>
       <form
