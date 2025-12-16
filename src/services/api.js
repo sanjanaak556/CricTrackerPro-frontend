@@ -1,6 +1,7 @@
 import axios from "axios";
 
-const BASE_URL = "http://localhost:5000/api";
+const BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
 
 // Create axios instance
 const apiClient = axios.create({
@@ -29,17 +30,25 @@ const api = {
   },
 
   sendOtp: async (email) => {
-    const res = await apiClient.post("/auth/forgot-password/send-otp", { email });
+    const res = await apiClient.post("/auth/forgot-password/send-otp", {
+      email,
+    });
     return res.data;
   },
 
   verifyOtp: async (email, otp) => {
-    const res = await apiClient.post("/auth/forgot-password/verify-otp", { email, otp });
+    const res = await apiClient.post("/auth/forgot-password/verify-otp", {
+      email,
+      otp,
+    });
     return res.data;
   },
 
   resetPassword: async (email, newPassword) => {
-    const res = await apiClient.post("/auth/forgot-password/reset", { email, newPassword });
+    const res = await apiClient.post("/auth/forgot-password/reset", {
+      email,
+      newPassword,
+    });
     return res.data;
   },
 
@@ -69,4 +78,3 @@ const api = {
 };
 
 export default api;
-
