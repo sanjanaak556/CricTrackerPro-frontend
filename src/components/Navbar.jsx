@@ -1,29 +1,26 @@
 import { useState, useEffect } from "react";
-import logo from "../assets/logo-1.jpg";
+import logo from "../assets/logo.jpg";
 import { Link } from "react-router-dom";
+import { setTheme } from "../utils/theme";
 
 export default function Navbar() {
-  const [theme, setTheme] = useState("light");
-
-  // Toggle theme
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", theme === "dark");
-  }, [theme]);
+  const [theme, setThemeState] = useState(
+    localStorage.getItem("theme") || "light"
+  );
 
   return (
     <nav className="w-full fixed top-0 left-0 z-50 px-6 py-4 flex items-center justify-between bg-transparent">
-
       {/* Logo + App Name */}
       <div className="flex items-center gap-3">
-        <img src={logo} alt="logo" className="h-10 w-10 object-contain" />
-        <span className="text-2xl font-bold text-white">
-          CricTrackerPro
-        </span>
+        <img src={logo} alt="logo" className="w-13 h-13 mx-auto rounded-full shadow-md border dark:border-gray-600" />
+        <span className="text-2xl font-bold text-white">CricTrackerPro</span>
       </div>
 
       {/* Links */}
       <ul className="hidden md:flex items-center gap-6 text-white font-medium">
-        <li className="hover:text-blue-300 cursor-pointer"><Link to="/">Home</Link></li>
+        <li className="hover:text-blue-300 cursor-pointer">
+          <Link to="/">Home</Link>
+        </li>
         <li className="hover:text-blue-300 cursor-pointer">Features</li>
         <li className="hover:text-blue-300 cursor-pointer">Live Matches</li>
         <li className="hover:text-blue-300 cursor-pointer">Teams</li>
@@ -42,8 +39,12 @@ export default function Navbar() {
 
         {/* Dark Mode Toggle */}
         <button
-          onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-          className="text-xl text-white cursor-pointer"
+          onClick={() => {
+            const newTheme = theme === "light" ? "dark" : "light";
+            setThemeState(newTheme);
+            setTheme(newTheme);
+          }}
+          className="text-xl cursor-pointer text-gray-900 dark:text-white"
         >
           {theme === "light" ? "🌙" : "☀️"}
         </button>
@@ -51,5 +52,3 @@ export default function Navbar() {
     </nav>
   );
 }
-
-

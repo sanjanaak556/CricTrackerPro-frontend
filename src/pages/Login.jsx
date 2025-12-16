@@ -24,6 +24,7 @@ export default function Login() {
     if (!res.success) {
       localStorage.setItem("token", res.token);
       localStorage.setItem("user", JSON.stringify(res.user));
+      localStorage.setItem("sidebarOpen", JSON.stringify(true));
 
       // Redirect based on role
       if (res.user.role === "admin") navigate("/admin/dashboard");
