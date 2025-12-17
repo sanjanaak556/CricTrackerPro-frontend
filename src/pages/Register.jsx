@@ -8,7 +8,7 @@ export default function Register() {
     name: "",
     email: "",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
   });
 
   const handleChange = (e) => {
@@ -33,7 +33,9 @@ export default function Register() {
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
     if (!strongPasswordRegex.test(form.password)) {
-      alert("Password must be 8+ chars, include uppercase, lowercase, number & special char");
+      alert(
+        "Password must be 8+ chars, include uppercase, lowercase, number & special char"
+      );
       return;
     }
 
@@ -51,7 +53,7 @@ export default function Register() {
       className="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat"
       style={{ backgroundImage: "url('/auth-bg.jpg')" }}
     >
-       <div className="absolute inset-0 bg-black/40"></div>
+      <div className="absolute inset-0 bg-black/40 pointer-events-none"></div>
       <form
         onSubmit={handleSubmit}
         className="bg-white p-6 rounded-lg shadow-lg w-96"
@@ -97,14 +99,13 @@ export default function Register() {
           Register
         </button>
 
-        <Link to="/" className="block mt-3 text-blue-500">
+        <Link to="/" className="block mt-3 text-blue-500 hover:text-blue-700 cursor-pointer">
           Back to Home
         </Link>
 
-        <Link to="/login" className="block mt-1 text-gray-600">
+        <Link to="/login" className="block mt-1 text-gray-600 hover:text-blue-600 cursor-pointer">
           Already a user? Login
         </Link>
-
       </form>
     </div>
   );

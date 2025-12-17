@@ -92,7 +92,7 @@ export default function Login() {
 
           <Link
             to="/"
-            className="block mt-3 text-blue-500 hover:text-blue-600 cursor-pointer"
+            className="block mt-3 text-blue-500 hover:text-blue-700 cursor-pointer"
           >
             Back to Home
           </Link>
