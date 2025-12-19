@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Clock, CalendarDays, ChevronRight } from "lucide-react";
+import { Clock, CalendarDays, ChevronRight, ArrowLeft } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function MatchHistory() {
   const [filter, setFilter] = useState("all");
@@ -38,6 +39,13 @@ export default function MatchHistory() {
 
   return (
     <div className="p-6 space-y-6 text-white">
+    {/* Back */}
+              <Link
+                to="/viewer/dashboard"
+                className="inline-flex items-center text-blue-600 hover:text-blue-400"
+              >
+                <ArrowLeft className="w-5 h-5 mr-1" /> Back to Dashboard
+              </Link>
       <h1 className="text-3xl font-bold">Match History</h1>
 
       {/* Filters */}

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { Users2, Search } from "lucide-react";
+import { Users2, Search, ArrowLeft } from "lucide-react";
 import api from "../../services/api";
+import { Link } from "react-router-dom";
 
 export default function Teams() {
   const [teams, setTeams] = useState([]);
@@ -66,6 +67,13 @@ export default function Teams() {
 
   return (
     <div className="p-6 text-white space-y-6">
+     {/* Back */}
+          <Link
+            to="/viewer/dashboard"
+            className="inline-flex items-center text-blue-600 hover:text-blue-400"
+          >
+            <ArrowLeft className="w-5 h-5 mr-1" /> Back to Dashboard
+          </Link>
       <h1 className="text-3xl font-bold">Teams</h1>
 
       {/* Search Bar */}

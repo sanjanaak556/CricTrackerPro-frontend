@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import api from "../../services/api";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, Swords, User, Target, ArrowLeft } from "lucide-react";
+import MatchEventAnimation from "../../components/dashboard/viewer/MatchEventAnimation";
 
 /* -------------------- helpers -------------------- */
 const ballBadge = (ball) => {
@@ -28,13 +29,6 @@ const commentaryColor = {
   NORMAL: "",
 };
 
-const StatCard = ({ title, children }) => (
-  <div className="bg-gray-100 dark:bg-gray-800 rounded-xl p-3 w-full">
-    <p className="text-xs text-gray-500 mb-1">{title}</p>
-    {children}
-  </div>
-);
-
 /* -------------------- component -------------------- */
 const LiveMatch = () => {
   const { matchId } = useParams();
@@ -46,12 +40,20 @@ const LiveMatch = () => {
   const [openOverId, setOpenOverId] = useState(null);
   const [commentary, setCommentary] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [players, setPlayers] = useState(null);
+
+  // ✨ NEW: match event animation state
+  const [matchEvent, setMatchEvent] = useState(null);
+  const [lastBallId, setLastBallId] = useState(null); // 🔧 FIX: prevent repeat animation
 
   /* -------------------- fetch -------------------- */
   const fetchLiveData = async () => {
     try {
       const matchRes = await api.get(`/matches/${matchId}`);
       setMatch(matchRes);
+
+      const playersRes = await api.get(`/matches/${matchId}/players`);
+      setPlayers(playersRes);
 
       const inningsRes = await api.get(`/innings/match/${matchId}`);
       const inningsList = Array.isArray(inningsRes) ? inningsRes : [];
@@ -82,28 +84,62 @@ const LiveMatch = () => {
     return () => clearInterval(interval);
   }, [matchId]);
 
+  /*  MATCH EVENT DETECTION (4 / 6 / WICKET) */
+  useEffect(() => {
+    if (!activeOver?.balls?.length) return;
+
+    const lastBall = activeOver.balls[activeOver.balls.length - 1];
+
+    // 🔧 FIX: avoid animation on polling refresh
+    if (lastBall._id === lastBallId) return;
+
+    setLastBallId(lastBall._id);
+
+    if (lastBall.isWicket) setMatchEvent("WICKET");
+    else if (lastBall.runs === 6) setMatchEvent("SIX");
+    else if (lastBall.runs === 4) setMatchEvent("FOUR");
+
+    if (lastBall.isWicket || lastBall.runs === 4 || lastBall.runs === 6) {
+      setTimeout(() => setMatchEvent(null), 1800);
+    }
+  }, [activeOver]); // 👈 correct dependency
+
   if (loading)
     return (
       <div className="p-6 text-center text-gray-500">Loading live match…</div>
     );
 
   if (!match)
-    return (
-      <div className="p-6 text-center text-red-500">Match not found</div>
-    );
+    return <div className="p-6 text-center text-red-500">Match not found</div>;
 
   /* -------------------- derived -------------------- */
-  const crr = match.currentScore?.overs
-    ? (match.currentScore.runs / match.currentScore.overs).toFixed(2)
-    : "0.00";
+  const oversBowled = Number(match.currentScore?.overs || 0);
 
-  const rrr = match.target && match.remainingOvers
-    ? ((match.target - match.currentScore.runs) / match.remainingOvers).toFixed(2)
-    : null;
+  const crr =
+    oversBowled > 0
+      ? (match.currentScore.runs / oversBowled).toFixed(2)
+      : "0.00";
+
+  const totalOvers = match.overs || 0;
+  const remainingOvers = totalOvers - oversBowled;
+
+  const rrr =
+    match.target && remainingOvers > 0
+      ? ((match.target - match.currentScore.runs) / remainingOvers).toFixed(2)
+      : null;
 
   /* -------------------- UI -------------------- */
   return (
-    <div className="p-4 md:p-6 space-y-6 dark:text-white">
+    <div className="relative p-4 md:p-6 space-y-6 dark:text-white">
+      {/* Back */}
+      <Link
+        to="/viewer/all-matches"
+        className="inline-flex items-center text-blue-600 hover:text-blue-400"
+      >
+        <ArrowLeft className="w-5 h-5 mr-1" /> Back to Matches
+      </Link>
+      {/*  NEW: MATCH EVENT ANIMATION OVERLAY */}
+      {matchEvent && <MatchEventAnimation type={matchEvent} />}
 
       {/* ================= MATCH HEADER ================= */}
       <div className="bg-white dark:bg-gray-900 rounded-2xl p-5 border dark:border-gray-700 shadow">
@@ -126,14 +162,36 @@ const LiveMatch = () => {
         </div>
 
         <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-          <p><b>Match:</b> {match.matchName}</p>
-          <p><b>Type:</b> {match.matchType}</p>
-          <p><b>Overs:</b> {match.overs}</p>
-          <p><b>Venue:</b> {match.venue?.name}</p>
-          <p><b>Toss:</b> {match.tossWinner?.name} ({match.tossDecision})</p>
-          <p><b>Umpires:</b> {match.umpires?.join(", ")}</p>
-          <p><b>Scorer:</b> {match.scorer?.name}</p>
-          <p><b>Date:</b> {new Date(match.startTime).toLocaleString()}</p>
+          <p>
+            <b>Match:</b> {match.matchName}
+          </p>
+          <p>
+            <b>Type:</b> {match.matchType}
+          </p>
+          <p>
+            <b>Overs:</b> {match.overs}
+          </p>
+          <p>
+            <b>Venue:</b> {match.venue?.name}
+          </p>
+          <p>
+            <b>Toss:</b> {match.tossWinner?.name} ({match.tossDecision})
+          </p>
+          <p>
+            <b>Umpires:</b>{" "}
+            {Array.isArray(match.umpires)
+              ? match.umpires.map((u) => u.name).join(", ")
+              : "—"}
+          </p>
+          <p>
+            <b>Scorer:</b> {match.scorerId?.name || "—"}
+          </p>
+          <p>
+            <b>Date:</b>{" "}
+            {match.scheduledAt
+              ? new Date(match.scheduledAt).toLocaleString()
+              : "—"}
+          </p>
         </div>
 
         {/* SCORE */}
@@ -159,76 +217,160 @@ const LiveMatch = () => {
       </div>
 
       {/* ================= PLAYERS ================= */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {[match.teamA, match.teamB].map((team) => (
-          <div key={team._id} className="bg-white dark:bg-gray-900 p-4 rounded-xl border dark:border-gray-700">
-            <h3 className="font-semibold mb-3 flex items-center gap-2">
-              <img src={team.logo} alt="" className="w-6 h-6" /> {team.name}
-            </h3>
-            <div className="space-y-2">
-              {team.players?.map((p) => (
-                <div key={p._id} className="flex items-center gap-3 text-sm">
-                  <img src={p.image} className="w-8 h-8 rounded-full" />
-                  <span className="w-6 text-gray-400">#{p.jersey}</span>
-                  <span className="flex-1">{p.name}</span>
-                  {p.isCaptain && (
-                    <span className="px-2 text-xs bg-yellow-500 text-black rounded">C</span>
-                  )}
-                  <span className="text-xs text-gray-500">{p.role}</span>
-                </div>
-              ))}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {players &&
+          [players.teamA, players.teamB].map((team, index) => (
+            <div
+              key={index}
+              className="bg-white dark:bg-gray-900 p-5 rounded-2xl shadow border dark:border-gray-700"
+            >
+              {/* Team Header */}
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold">
+                  {index === 0 ? match.teamA.name : match.teamB.name}
+                </h3>
+                <span className="text-xs text-gray-500">
+                  {team.players.length} Players
+                </span>
+              </div>
+
+              {/* Players */}
+              <div className="space-y-3">
+                {team.players.map((p) => (
+                  <div
+                    key={p._id}
+                    className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+                  >
+                    <img
+                      src={p.image}
+                      alt={p.name}
+                      className="w-9 h-9 rounded-full object-cover"
+                    />
+
+                    <div className="flex-1">
+                      <p className="text-sm font-medium flex items-center gap-1">
+                        {p.name}
+                        {p.isCaptain && (
+                          <span className="text-[10px] px-2 py-[1px] rounded bg-yellow-500 text-black font-semibold">
+                            C
+                          </span>
+                        )}
+                      </p>
+                      <p className="text-xs text-gray-500">{p.role}</p>
+                    </div>
+
+                    {/* Icon */}
+                    <span className="text-gray-400">
+                      {p.role === "Batter" && "🏏"}
+                      {p.role === "Bowler" && "🎯"}
+                      {p.role === "All-Rounder" && "⚡"}
+                      {p.role === "Wicket-Keeper" && "🧤"}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
       </div>
 
       {/* ================= BATTER & BOWLER ================= */}
       {activeInnings && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <StatCard title="Striker 🏏">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {/* STRIKER */}
+          <div className="bg-white dark:bg-gray-900 p-4 rounded-2xl shadow border dark:border-gray-700">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 rounded-lg bg-green-500 text-white">
+                <Swords size={18} />
+              </div>
+              <p className="text-sm font-semibold text-gray-600 dark:text-gray-300">
+                Striker
+              </p>
+            </div>
+
             {activeInnings.striker ? (
               <>
-                <p className="font-semibold text-green-600">
+                <p className="text-lg font-bold text-green-600">
                   {activeInnings.striker.name} *
                 </p>
                 <p className="text-sm text-gray-500">
-                  Runs: {activeInnings.strikerRuns ?? 0} ({activeInnings.strikerBalls ?? 0})
+                  {activeInnings.strikerRuns ?? 0} runs •{" "}
+                  {activeInnings.strikerBalls ?? 0} balls
                 </p>
               </>
-            ) : <p className="text-sm text-gray-400">Not decided</p>}
-          </StatCard>
+            ) : (
+              <p className="text-sm text-gray-400">Not decided</p>
+            )}
+          </div>
 
-          <StatCard title="Non-Striker">
+          {/* NON STRIKER */}
+          <div className="bg-white dark:bg-gray-900 p-4 rounded-2xl shadow border dark:border-gray-700">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 rounded-lg bg-blue-500 text-white">
+                <User size={18} />
+              </div>
+              <p className="text-sm font-semibold text-gray-600 dark:text-gray-300">
+                Non-Striker
+              </p>
+            </div>
+
             {activeInnings.nonStriker ? (
               <>
-                <p className="font-semibold">{activeInnings.nonStriker.name}</p>
+                <p className="text-lg font-bold">
+                  {activeInnings.nonStriker.name}
+                </p>
                 <p className="text-sm text-gray-500">
-                  Runs: {activeInnings.nonStrikerRuns ?? 0} ({activeInnings.nonStrikerBalls ?? 0})
+                  {activeInnings.nonStrikerRuns ?? 0} runs •{" "}
+                  {activeInnings.nonStrikerBalls ?? 0} balls
                 </p>
               </>
-            ) : <p className="text-sm text-gray-400">Not decided</p>}
-          </StatCard>
+            ) : (
+              <p className="text-sm text-gray-400">Not decided</p>
+            )}
+          </div>
 
-          <StatCard title="Current Bowler 🎯">
+          {/* CURRENT BOWLER */}
+          <div className="bg-white dark:bg-gray-900 p-4 rounded-2xl shadow border dark:border-gray-700">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 rounded-lg bg-purple-500 text-white">
+                <Target size={18} />
+              </div>
+              <p className="text-sm font-semibold text-gray-600 dark:text-gray-300">
+                Current Bowler
+              </p>
+            </div>
+
             {activeInnings.currentBowler ? (
               <>
-                <p className="font-semibold text-purple-500">{activeInnings.currentBowler.name}</p>
+                <p className="text-lg font-bold text-purple-500">
+                  {activeInnings.currentBowler.name}
+                </p>
                 <p className="text-sm text-gray-500">
-                  Overs: {activeInnings.bowlerOvers ?? "0.0"} | Runs: {activeInnings.bowlerRuns ?? 0} | Wkts: {activeInnings.bowlerWickets ?? 0}
+                  Overs: {activeInnings.bowlerOvers ?? "0.0"} • Runs:{" "}
+                  {activeInnings.bowlerRuns ?? 0} • Wkts:{" "}
+                  {activeInnings.bowlerWickets ?? 0}
                 </p>
               </>
-            ) : <p className="text-sm text-gray-400">Not decided</p>}
-          </StatCard>
+            ) : (
+              <p className="text-sm text-gray-400">Not decided</p>
+            )}
+          </div>
         </div>
       )}
 
       {/* ================= ACTIVE OVER ================= */}
       {activeOver && (
         <div className="bg-white dark:bg-gray-900 p-4 rounded-xl border dark:border-gray-700">
-          <h3 className="font-semibold mb-2">Over {activeOver.overNumber} — {activeOver.bowler?.name}</h3>
+          <h3 className="font-semibold mb-2">
+            Over {activeOver.overNumber} — {activeOver.bowler?.name}
+          </h3>
           <div className="flex gap-2 flex-wrap">
             {activeOver.balls?.map((ball) => (
-              <span key={ball._id} className={`w-9 h-9 flex items-center justify-center rounded-full text-sm font-bold ${ballStyle(ball)}`}>
+              <span
+                key={ball._id}
+                className={`w-9 h-9 flex items-center justify-center rounded-full text-sm font-bold ${ballStyle(
+                  ball
+                )}`}
+              >
                 {ballBadge(ball)}
               </span>
             ))}
@@ -242,18 +384,30 @@ const LiveMatch = () => {
           <h3 className="font-semibold mb-3">Over by Over</h3>
           <div className="space-y-2">
             {[...overs].reverse().map((over) => (
-              <div key={over._id} className="border rounded-lg dark:border-gray-700">
+              <div
+                key={over._id}
+                className="border rounded-lg dark:border-gray-700"
+              >
                 <button
-                  onClick={() => setOpenOverId(openOverId === over._id ? null : over._id)}
+                  onClick={() =>
+                    setOpenOverId(openOverId === over._id ? null : over._id)
+                  }
                   className="w-full flex justify-between items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800"
                 >
                   <span className="font-medium">Over {over.overNumber}</span>
-                  <span className="text-sm text-gray-500">{over.balls?.length || 0} balls</span>
+                  <span className="text-sm text-gray-500">
+                    {over.balls?.length || 0} balls
+                  </span>
                 </button>
                 {openOverId === over._id && (
                   <div className="px-4 pb-3 flex gap-2 flex-wrap">
                     {over.balls?.map((ball) => (
-                      <span key={ball._id} className={`w-9 h-9 flex items-center justify-center rounded-full text-sm font-bold ${ballStyle(ball)}`}>
+                      <span
+                        key={ball._id}
+                        className={`w-9 h-9 flex items-center justify-center rounded-full text-sm font-bold ${ballStyle(
+                          ball
+                        )}`}
+                      >
                         {ballBadge(ball)}
                       </span>
                     ))}
@@ -269,10 +423,14 @@ const LiveMatch = () => {
       <div className="bg-white dark:bg-gray-900 p-4 rounded-xl border dark:border-gray-700">
         <h3 className="font-semibold mb-3">Live Commentary</h3>
         <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2">
-          {commentary.length === 0 && <p className="text-sm text-gray-500">No commentary yet</p>}
+          {commentary.length === 0 && (
+            <p className="text-sm text-gray-500">No commentary yet</p>
+          )}
           {commentary.map((c) => (
             <div key={c._id} className={`text-sm ${commentaryColor[c.type]}`}>
-              <span className="text-xs text-gray-400 mr-2">{new Date(c.createdAt).toLocaleTimeString()}</span>
+              <span className="text-xs text-gray-400 mr-2">
+                {new Date(c.createdAt).toLocaleTimeString()}
+              </span>
               {c.text}
             </div>
           ))}

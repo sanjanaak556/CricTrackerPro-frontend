@@ -64,11 +64,13 @@ export default function MatchPreview() {
   const teamAData = teamsWithPlayers?.teamA || null;
   const teamBData = teamsWithPlayers?.teamB || null;
 
+  const isScorer = location.pathname.startsWith("/scorer");
+
   return (
     <div className="space-y-6">
       {/* Back */}
       <Link
-        to="/viewer/all-matches"
+        to={isScorer ? "/scorer/matches" : "/viewer/all-matches"}
         className="inline-flex items-center text-blue-600 hover:text-blue-400"
       >
         <ArrowLeft className="w-5 h-5 mr-1" /> Back to Matches
@@ -84,6 +86,22 @@ export default function MatchPreview() {
           <p className="text-sm mt-1 opacity-80">
             New schedule will be announced soon.
           </p>
+        </div>
+      )}
+
+      {/* Abandoned Notice */}
+      {match.status === "abandoned" && (
+        <div className="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 p-4 rounded-xl shadow">
+          <h3 className="font-bold text-lg">🚫 Match Abandoned - No Result</h3>
+          <p className="mt-1">
+            {match.statusReason ||
+              "Match abandoned due to unavoidable circumstances."}
+          </p>
+          {match.abandonedAt && (
+            <p className="text-sm mt-1 opacity-80">
+              Abandoned at: {new Date(match.abandonedAt).toLocaleString()}
+            </p>
+          )}
         </div>
       )}
 

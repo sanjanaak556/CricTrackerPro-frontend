@@ -18,7 +18,7 @@ export default function MatchSummary() {
     Promise.all([
       api.get(`/matches/${matchId}`),
       api.get(`/matches/${matchId}/players`),
-      api.get(`/match-summary/${matchId}`), 
+      api.get(`/match-summary/${matchId}`),
     ])
       .then(([matchRes, playersRes, summaryRes]) => {
         setMatch(matchRes);
@@ -129,9 +129,18 @@ export default function MatchSummary() {
         </div>
       )}
 
-      {status === "abandoned" && (
-        <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-xl text-center text-gray-600 dark:text-gray-300 font-semibold">
-          ❌ Match Abandoned – No Result
+      {match.status === "abandoned" && (
+        <div className="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 p-4 rounded-xl shadow">
+          <h3 className="font-bold text-lg">🚫 Match Abandoned - No Result</h3>
+          <p className="mt-1">
+            {match.statusReason ||
+              "Match abandoned due to unavoidable circumstances."}
+          </p>
+          {match.abandonedAt && (
+            <p className="text-sm mt-1 opacity-80">
+              Abandoned at: {new Date(match.abandonedAt).toLocaleString()}
+            </p>
+          )}
         </div>
       )}
 

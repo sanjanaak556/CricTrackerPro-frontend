@@ -11,6 +11,9 @@ import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import Logout from "./pages/Logout";
 
+import ProtectedRoute from "./components/ProtectedRoute";
+import DashboardLayout from "./components/dashboard/DashboardLayout";
+
 // Admin
 import AdminDashboard from "./pages/Admin/AdminDashboard";
 import ManageTeams from "./pages/Admin/ManageTeams";
@@ -27,10 +30,6 @@ import ScorerDashboard from "./pages/Scorer/ScorerDashboard";
 // Viewer
 import ViewerDashboard from "./pages/Viewer/ViewerDashboard";
 import AllMatches from "./pages/Viewer/AllMatches";
-
-import ProtectedRoute from "./components/ProtectedRoute";
-import DashboardLayout from "./components/dashboard/DashboardLayout";
-
 import Leaderboard from "./pages/Viewer/Leaderboard";
 import Highlights from "./pages/Viewer/Highlights";
 import MatchHistory from "./pages/Viewer/MatchHistory";
@@ -39,6 +38,9 @@ import FollowedTeams from "./pages/Viewer/FollowedTeams";
 import MatchPreview from "./pages/Viewer/MatchPreview";
 import MatchSummary from "./pages/Viewer/MatchSummary";
 import LiveMatch from "./pages/Viewer/LiveMatch";
+import ManageScorerMatches from "./pages/Scorer/ManageScorerMatches";
+
+
 
 function App() {
   // 🔹 Socket listeners
@@ -77,6 +79,7 @@ function App() {
         }
       />
       <Route path="/logout" element={<Logout />} />
+
 
       {/* ADMIN */}
       <Route
@@ -178,6 +181,7 @@ function App() {
         }
       />
 
+
       {/* SCORER */}
       <Route
         path="/scorer/dashboard"
@@ -189,6 +193,29 @@ function App() {
           </ProtectedRoute>
         }
       />
+      {/* Manage Scorer Matches */}
+      <Route
+        path="/scorer/matches"
+        element={
+          <ProtectedRoute role="scorer">
+            <DashboardLayout>
+              <ManageScorerMatches />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
+      {/*  */}
+       <Route
+        path="/scorer/match/:matchId"
+        element={
+          <ProtectedRoute role="scorer">
+            <DashboardLayout>
+              <MatchPreview />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
+
 
       {/* VIEWER */}
       <Route

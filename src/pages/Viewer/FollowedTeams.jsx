@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../../services/api";
+import { Link } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 
 export default function FollowedTeams() {
   const [teams, setTeams] = useState([]);
@@ -24,11 +26,10 @@ export default function FollowedTeams() {
       // Remove from list immediately
       setTeams((prev) => prev.filter((t) => t._id !== teamId));
 
-      // 🔥 Update teams page state via custom event
+      //  Update teams page state via custom event
       window.dispatchEvent(
         new CustomEvent("team-unfollowed", { detail: { teamId } })
       );
-
     } catch (err) {
       console.error("Error unfollowing team", err);
     }
@@ -36,14 +37,20 @@ export default function FollowedTeams() {
 
   return (
     <div className="p-6 text-white space-y-6">
-      
+      {/* Back */}
+      <Link
+        to="/viewer/dashboard"
+        className="inline-flex items-center text-blue-600 hover:text-blue-400"
+      >
+        <ArrowLeft className="w-5 h-5 mr-1" /> Back to Dashboard
+      </Link>
+
       {/* Heading with count */}
-      <h1 className="text-3xl font-bold">
-        Followed Teams
-      </h1>
+      <h1 className="text-3xl font-bold">Followed Teams</h1>
 
       <p className="text-gray-400">
-        You are following <span className="font-semibold text-white">{teams.length}</span> team(s)
+        You are following{" "}
+        <span className="font-semibold text-white">{teams.length}</span> team(s)
       </p>
 
       {teams.length === 0 ? (

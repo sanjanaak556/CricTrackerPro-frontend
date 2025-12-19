@@ -149,17 +149,16 @@ const Settings = () => {
       : "/viewer/dashboard";
 
   return (
-    <div className="p-4 sm:p-8">
-      {/* Back Button */}
+    <div className="p-4 sm:p-8 space-y-6">
+      {/* Back */}
       <Link
-        to={dashboardRoute}
-        className="flex items-center gap-2 text-sm font-medium text-blue-600 dark:text-blue-400 mb-6"
+        to="/viewer/dashboard"
+        className="inline-flex items-center text-blue-600 hover:text-blue-400"
       >
-        <ArrowLeft size={18} />
-        Back to Dashboard
+        <ArrowLeft className="w-5 h-5 mr-1" /> Back to Dashboard
       </Link>
 
-      <h1 className="text-2xl font-bold mb-6 dark:text-white">Settings</h1>
+      <h1 className="text-3xl font-bold dark:text-white">Settings</h1>
 
       {/* Tabs */}
       <div className="flex gap-2 mb-6 bg-gray-200 dark:bg-gray-800 p-1 rounded-lg w-fit">

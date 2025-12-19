@@ -8,7 +8,7 @@ const statusConfig = {
     button: "Watch Live",
     buttonIcon: <PlayCircle size={18} />,
     buttonStyle: "bg-red-600 hover:bg-red-700",
-    route: (id) => `/viewer/match/live/${id}`, // ✅ fixed
+    route: (id) => `/viewer/match/live/${id}`,
   },
   upcoming: {
     badge: "bg-blue-500/20 text-blue-600 border-blue-500",
@@ -16,7 +16,7 @@ const statusConfig = {
     button: "Match Preview",
     buttonIcon: <Calendar size={18} />,
     buttonStyle: "bg-blue-600 hover:bg-blue-700",
-    route: (id) => `/viewer/match/preview/${id}`, // ✅ fixed
+    route: (id) => `/viewer/match/preview/${id}`,
   },
   completed: {
     badge: "bg-green-500/20 text-green-600 border-green-500",
@@ -24,7 +24,7 @@ const statusConfig = {
     button: "View Summary",
     buttonIcon: <Eye size={18} />,
     buttonStyle: "bg-green-600 hover:bg-green-700",
-    route: (id) => `/viewer/match/summary/${id}`, // ✅ fixed
+    route: (id) => `/viewer/match/summary/${id}`,
   },
   abandoned: {
     badge: "bg-gray-400/20 text-gray-500 border-gray-400",
@@ -32,7 +32,7 @@ const statusConfig = {
     button: "Match Info",
     buttonIcon: <AlertTriangle size={18} />,
     buttonStyle: "bg-gray-500 hover:bg-gray-600",
-    route: (id) => `/viewer/match/summary/${id}`, // ✅ fixed
+    route: (id) => `/viewer/match/summary/${id}`,
   },
   postponed: {
     badge: "bg-orange-400/20 text-orange-500 border-orange-400",
@@ -40,7 +40,7 @@ const statusConfig = {
     button: "New Schedule",
     buttonIcon: <Calendar size={18} />,
     buttonStyle: "bg-orange-500 hover:bg-orange-600",
-    route: (id) => `/viewer/match/preview/${id}`, // ✅ fixed
+    route: (id) => `/viewer/match/preview/${id}`,
   },
 };
 

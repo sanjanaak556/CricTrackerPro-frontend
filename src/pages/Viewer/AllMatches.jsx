@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import MatchFilters from "../../components/dashboard/viewer/MatchFilters";
 import MatchCard from "../../components/dashboard/viewer/MatchCard";
 import api from "../../services/api";
+import { Link } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 
 const AllMatches = () => {
   const [matches, setMatches] = useState([]);
@@ -29,8 +31,15 @@ const AllMatches = () => {
   }, [activeFilter]);
 
   return (
-    <div className="p-4 md:p-6">
-      <h1 className="text-xl font-bold dark:text-white mb-4">All Matches</h1>
+    <div className="p-4 md:p-6 space-y-6">
+     {/* Back */}
+      <Link
+        to="/viewer/dashboard"
+        className="inline-flex items-center text-blue-600 hover:text-blue-400"
+      >
+        <ArrowLeft className="w-5 h-5 mr-1" /> Back to Dashboard
+      </Link>
+      <h1 className="text-3xl font-bold dark:text-white">All Matches</h1>
 
       <MatchFilters activeFilter={activeFilter} onChange={setActiveFilter} />
 
