@@ -9,8 +9,10 @@ export default function ManageTeams() {
   const [error, setError] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingTeam, setEditingTeam] = useState(null);
+
   const [formData, setFormData] = useState({
     name: "",
+    captain: "",
     playerCount: "",
     matchesPlayed: "",
     logo: null,
@@ -27,7 +29,6 @@ export default function ManageTeams() {
       setTeams(response.teams || []);
     } catch (err) {
       setError("Failed to load teams");
-      console.error("Teams error:", err);
     } finally {
       setLoading(false);
     }
@@ -54,6 +55,7 @@ export default function ManageTeams() {
     try {
       const formDataToSend = new FormData();
       formDataToSend.append("name", formData.name);
+      formDataToSend.append("captain", formData.captain);
       formDataToSend.append("playerCount", formData.playerCount);
       formDataToSend.append("matchesPlayed", formData.matchesPlayed);
       if (formData.logo) formDataToSend.append("logo", formData.logo);
@@ -72,7 +74,6 @@ export default function ManageTeams() {
       fetchTeams();
     } catch (err) {
       setError("Failed to save team");
-      console.error("Save team error:", err);
     }
   };
 
@@ -80,6 +81,7 @@ export default function ManageTeams() {
     setEditingTeam(team);
     setFormData({
       name: team.name,
+      captain: team.captain || "",
       playerCount: team.playerCount,
       matchesPlayed: team.matchesPlayed,
       logo: null,
@@ -88,21 +90,25 @@ export default function ManageTeams() {
   };
 
   const handleDelete = async (teamId) => {
-    if (window.confirm("Are you sure you want to delete this team?")) {
-      try {
-        await api.delete(`/admin/teams/${teamId}`);
-        fetchTeams();
-      } catch (err) {
-        setError("Failed to delete team");
-        console.error("Delete team error:", err);
-      }
+    if (!window.confirm("Are you sure you want to delete this team?")) return;
+    try {
+      await api.delete(`/admin/teams/${teamId}`);
+      fetchTeams();
+    } catch {
+      setError("Failed to delete team");
     }
   };
 
   const resetForm = () => {
     setShowAddForm(false);
     setEditingTeam(null);
-    setFormData({ name: "", playerCount: "", matchesPlayed: "", logo: null });
+    setFormData({
+      name: "",
+      captain: "",
+      playerCount: "",
+      matchesPlayed: "",
+      logo: null,
+    });
   };
 
   if (loading) {
@@ -119,7 +125,6 @@ export default function ManageTeams() {
 
   return (
     <div className="space-y-6">
-      {/* Back Button */}
       <Link
         to="/admin/dashboard"
         className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-300"
@@ -127,7 +132,6 @@ export default function ManageTeams() {
         <ArrowLeft className="w-5 h-5 mr-1" /> Back to Dashboard
       </Link>
 
-      {/* Top Bar */}
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
           Manage Teams
@@ -141,69 +145,51 @@ export default function ManageTeams() {
         </button>
       </div>
 
-      {/* Add/Edit Form */}
       {showAddForm && (
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md w-full overflow-hidden">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
           <h2 className="text-lg font-semibold mb-4 dark:text-white">
             {editingTeam ? "Edit Team" : "Add New Team"}
           </h2>
 
           <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Name */}
-            <InputField
-              label="Team Name"
-              name="name"
-              type="text"
-              value={formData.name}
-              onChange={handleInputChange}
-            />
+            <InputField label="Team Name" name="name" value={formData.name} onChange={handleInputChange} />
+            <InputField label="Captain Name" name="captain" value={formData.captain} onChange={handleInputChange} />
+            <InputField label="Player Count" name="playerCount" type="number" value={formData.playerCount} onChange={handleInputChange} />
+            <InputField label="Matches Played" name="matchesPlayed" type="number" value={formData.matchesPlayed} onChange={handleInputChange} />
 
-            {/* Player Count */}
-            <InputField
-              label="Player Count"
-              name="playerCount"
-              type="number"
-              value={formData.playerCount}
-              onChange={handleInputChange}
-            />
-
-            {/* Matches Played */}
-            <InputField
-              label="Matches Played"
-              name="matchesPlayed"
-              type="number"
-              value={formData.matchesPlayed}
-              onChange={handleInputChange}
-            />
-
-            {/* Logo */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <div className="sm:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Team Logo
               </label>
+
+              <label
+                htmlFor="teamLogo"
+                className="inline-block cursor-pointer px-4 py-2 rounded-md
+      bg-gray-200 dark:bg-gray-700
+      text-gray-800 dark:text-gray-200
+      hover:bg-gray-300 dark:hover:bg-gray-600"
+              >
+                Choose File
+              </label>
+
+              <span className="ml-3 text-sm text-gray-600 dark:text-gray-400">
+                {formData.logo ? formData.logo.name : "No file selected"}
+              </span>
+
               <input
+                id="teamLogo"
                 type="file"
                 accept="image/*"
                 onChange={handleFileChange}
-                className="mt-1 block w-full text-sm text-gray-700 dark:text-gray-300
-             file:mr-4 file:py-2 file:px-4
-             file:rounded-lg file:border file:border-gray-300
-             file:bg-gray-100 dark:file:bg-gray-700
-             file:text-gray-700 dark:file:text-gray-300"
+                className="hidden"
               />
             </div>
 
-            {/* Buttons */}
-            <div className="flex space-x-2">
+            <div className="sm:col-span-2 flex space-x-2">
               <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
                 {editingTeam ? "Update Team" : "Add Team"}
               </button>
-
-              <button
-                type="button"
-                onClick={resetForm}
-                className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600"
-              >
+              <button type="button" onClick={resetForm} className="bg-gray-500 text-white px-4 py-2 rounded-lg">
                 Cancel
               </button>
             </div>
@@ -211,41 +197,29 @@ export default function ManageTeams() {
         </div>
       )}
 
-      {/* Team Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {teams.map((team) => (
-          <div
-            key={team._id}
-            className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"
-          >
-            <div className="flex items-center space-x-4 mb-4">
-              <img
-                src={team.logo || "/default-team-logo.png"}
-                alt={team.name}
-                className="w-16 h-16 rounded-full object-contain bg-gray-200"
-              />
+          <div key={team._id} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              {team.name}
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-300">
+              Players: {team.playerCount}
+            </p>
+            <p className="text-sm text-gray-600 dark:text-gray-300">
+              Matches: {team.matchesPlayed}
+            </p>
+            <p className="text-sm text-green-600 dark:text-green-400 mt-1">
+              Captain: {team.captain}
+            </p>
 
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  {team.name}
-                </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-300">
-                  Players: {team.playerCount}
-                </p>
-                <p className="text-sm text-gray-600 dark:text-gray-300">
-                  Matches: {team.matchesPlayed}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex space-x-2">
+            <div className="flex space-x-2 mt-3">
               <button
                 onClick={() => handleEdit(team)}
                 className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
               >
                 Edit
               </button>
-
               <button
                 onClick={() => handleDelete(team._id)}
                 className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
@@ -256,20 +230,12 @@ export default function ManageTeams() {
           </div>
         ))}
       </div>
-
-      {teams.length === 0 && (
-        <div className="text-center text-gray-500 py-8">
-          No teams found. Click “Add New Team” to create your first team.
-        </div>
-      )}
     </div>
   );
 }
 
 /* ------------------------ */
-/* Reusable Input Component */
-/* ------------------------ */
-function InputField({ label, name, type, value, onChange }) {
+function InputField({ label, name, type = "text", value, onChange }) {
   return (
     <div>
       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -282,9 +248,8 @@ function InputField({ label, name, type, value, onChange }) {
         value={value}
         onChange={onChange}
         className="mt-1 block w-full px-3 py-2 rounded-md bg-gray-50 dark:bg-gray-700
-                   border border-gray-300 dark:border-gray-600
-                   text-gray-900 dark:text-gray-100
-                   focus:ring-blue-500 focus:border-blue-500 outline-none"
+        border border-gray-300 dark:border-gray-600
+        text-gray-900 dark:text-gray-100"
       />
     </div>
   );

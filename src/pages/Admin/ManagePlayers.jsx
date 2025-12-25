@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import api from "../../services/api";
 import { Link } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Crown } from "lucide-react";
 
 export default function ManagePlayers() {
   const [players, setPlayers] = useState([]);
@@ -10,6 +10,8 @@ export default function ManagePlayers() {
   const [error, setError] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingPlayer, setEditingPlayer] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
     role: "",
@@ -18,6 +20,7 @@ export default function ManagePlayers() {
     runs: "",
     wickets: "",
     average: "",
+    isCaptain: false,
     image: null,
   });
 
@@ -26,11 +29,13 @@ export default function ManagePlayers() {
     fetchTeams();
   }, []);
 
-  const fetchPlayers = async () => {
+  const fetchPlayers = async (page = 1) => {
     try {
       setLoading(true);
-      const response = await api.get("/admin/players");
+      const response = await api.get(`/admin/players?page=${page}`);
       setPlayers(response.players || []);
+      setCurrentPage(response.pagination?.currentPage || 1);
+      setPagination(response.pagination);
     } catch (err) {
       setError("Failed to load players");
       console.error("Players error:", err);
@@ -49,10 +54,10 @@ export default function ManagePlayers() {
   };
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
@@ -68,8 +73,26 @@ export default function ManagePlayers() {
 
     try {
       const data = new FormData();
+      
+      // Append all form data to FormData
       Object.keys(formData).forEach((key) => {
-        if (formData[key]) data.append(key, formData[key]);
+        if (formData[key] !== null && formData[key] !== undefined) {
+          if (key === "isCaptain") {
+            // Convert boolean to string for FormData
+            data.append(key, formData[key].toString());
+          } else if (key === "image" && formData[key] instanceof File) {
+            // Append image file if it exists
+            data.append(key, formData[key]);
+          } else if (key !== "image") {
+            // Append all other fields except image (when it's null)
+            data.append(key, formData[key]);
+          }
+        }
+      });
+
+      console.log("Form data to submit:", {
+        ...formData,
+        isCaptain: formData.isCaptain
       });
 
       if (editingPlayer) {
@@ -83,10 +106,11 @@ export default function ManagePlayers() {
       }
 
       resetForm();
-      fetchPlayers();
+      fetchPlayers(currentPage);
     } catch (err) {
       setError("Failed to save player");
       console.error("Save player error:", err);
+      console.error("Error details:", err.response?.data);
     }
   };
 
@@ -95,11 +119,12 @@ export default function ManagePlayers() {
     setFormData({
       name: player.name,
       role: player.role,
-      teamId: player.teamId?._id,
-      matchesPlayed: player.matchesPlayed,
-      runs: player.runs,
-      wickets: player.wickets,
-      average: player.average,
+      teamId: player.teamId?._id || "",
+      matchesPlayed: player.matchesPlayed || "",
+      runs: player.runs || "",
+      wickets: player.wickets || "",
+      average: player.average || "",
+      isCaptain: player.isCaptain || false,
       image: null,
     });
 
@@ -110,7 +135,7 @@ export default function ManagePlayers() {
     if (window.confirm("Are you sure you want to delete this player?")) {
       try {
         await api.delete(`/admin/players/${playerId}`);
-        fetchPlayers();
+        fetchPlayers(currentPage);
       } catch (err) {
         setError("Failed to delete player");
         console.error("Delete player error:", err);
@@ -129,6 +154,7 @@ export default function ManagePlayers() {
       runs: "",
       wickets: "",
       average: "",
+      isCaptain: false,
       image: null,
     });
   };
@@ -233,6 +259,30 @@ export default function ManagePlayers() {
                 onChange={handleInputChange}
               />
 
+              {/* Captain checkbox */}
+              <div className="md:col-span-2">
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="isCaptain"
+                    name="isCaptain"
+                    checked={formData.isCaptain}
+                    onChange={handleInputChange}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                  <label 
+                    htmlFor="isCaptain"
+                    className="ml-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                  >
+                    Team Captain
+                  </label>
+                  <Crown className="ml-2 h-4 w-4 text-yellow-500" />
+                </div>
+                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                  Check this box if the player is the team captain
+                </p>
+              </div>
+
               {/* Image upload */}
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium dark:text-gray-300">
@@ -253,7 +303,10 @@ export default function ManagePlayers() {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-2 pt-4">
-              <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex-1 sm:flex-none min-h-[44px]">
+              <button 
+                type="submit"
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex-1 sm:flex-none min-h-[44px]"
+              >
                 {editingPlayer ? "Update" : "Add Player"}
               </button>
               <button
@@ -296,19 +349,36 @@ export default function ManagePlayers() {
 
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               {players.map((player) => (
-                <tr key={player._id}>
-                  <td className="px-6 py-4 whitespace-nowrap flex items-center">
-                    <img
-                      src={player.image || "/default-player.png"}
-                      alt={player.name}
-                      className="h-10 w-10 rounded-full object-contain bg-gray-200"
-                    />
-                    <div className="ml-4">
-                      <div className="text-sm font-medium dark:text-gray-100">
-                        {player.name}
+                <tr 
+                  key={player._id}
+                  className={player.isCaptain ? "bg-yellow-50 dark:bg-yellow-900/20" : ""}
+                >
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      <div className="relative">
+                        <img
+                          src={player.image || "/default-player.png"}
+                          alt={player.name}
+                          className="h-10 w-10 rounded-full object-contain bg-gray-200"
+                        />
+                        {player.isCaptain && (
+                          <div className="absolute -top-1 -right-1 bg-yellow-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold border border-white">
+                            C
+                          </div>
+                        )}
                       </div>
-                      <div className="text-sm text-gray-500 dark:text-gray-300">
-                        {player.role}
+                      <div className="ml-4">
+                        <div className="flex items-center space-x-2">
+                          <span className="text-sm font-medium dark:text-gray-100">
+                            {player.name}
+                          </span>
+                          {player.isCaptain && (
+                            <Crown className="h-4 w-4 text-yellow-500" />
+                          )}
+                        </div>
+                        <div className="text-sm text-gray-500 dark:text-gray-300">
+                          {player.role}
+                        </div>
                       </div>
                     </div>
                   </td>
@@ -354,20 +424,40 @@ export default function ManagePlayers() {
           {players.map((player) => (
             <div 
               key={player._id} 
-              className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 shadow"
+              className={`bg-gray-50 dark:bg-gray-700 rounded-lg p-4 shadow relative ${
+                player.isCaptain ? "border-l-4 border-yellow-500" : ""
+              }`}
             >
+              {player.isCaptain && (
+                <div className="absolute top-2 right-2 bg-yellow-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">
+                  C
+                </div>
+              )}
+              
               <div className="flex items-start space-x-3">
-                <img
-                  src={player.image || "/default-player.png"}
-                  alt={player.name}
-                  className="h-12 w-12 rounded-full object-contain bg-gray-200"
-                />
+                <div className="relative">
+                  <img
+                    src={player.image || "/default-player.png"}
+                    alt={player.name}
+                    className="h-12 w-12 rounded-full object-contain bg-gray-200"
+                  />
+                  {player.isCaptain && (
+                    <div className="absolute -top-1 -right-1 bg-yellow-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
+                      C
+                    </div>
+                  )}
+                </div>
                 <div className="flex-1">
                   <div className="flex justify-between items-start">
                     <div>
-                      <h3 className="font-medium text-gray-900 dark:text-white">
-                        {player.name}
-                      </h3>
+                      <div className="flex items-center space-x-2">
+                        <h3 className="font-medium text-gray-900 dark:text-white">
+                          {player.name}
+                        </h3>
+                        {player.isCaptain && (
+                          <Crown className="h-4 w-4 text-yellow-500" />
+                        )}
+                      </div>
                       <p className="text-sm text-gray-600 dark:text-gray-300">
                         {player.role} • {player.teamId?.name}
                       </p>
@@ -419,6 +509,39 @@ export default function ManagePlayers() {
           </div>
         )}
       </div>
+
+      {/* Pagination */}
+      {pagination && pagination.totalPages > 1 && (
+        <div className="flex justify-center items-center space-x-2 mt-6">
+          <button
+            onClick={() => {
+              if (pagination.hasPrev) {
+                fetchPlayers(currentPage - 1);
+              }
+            }}
+            disabled={!pagination.hasPrev}
+            className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
+          >
+            Previous
+          </button>
+
+          <span className="text-sm text-gray-600 dark:text-gray-400">
+            Page {pagination.currentPage} of {pagination.totalPages}
+          </span>
+
+          <button
+            onClick={() => {
+              if (pagination.hasNext) {
+                fetchPlayers(currentPage + 1);
+              }
+            }}
+            disabled={!pagination.hasNext}
+            className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -37,7 +37,6 @@ export default function DashboardSidebar({ sidebarOpen, setSidebarOpen }) {
 
     scorer: [
       { name: "Dashboard", icon: LayoutDashboard, path: "/scorer/dashboard" },
-      { name: "Live Scoring", icon: Activity, path: "/scorer/live" },
       { name: "Manage Matches", icon: ListChecks, path: "/scorer/matches" },
       { name: "Scoreboard", icon: Flag, path: "/scorer/scoreboard" },
       { name: "Match History", icon: History, path: "/scorer/history" },

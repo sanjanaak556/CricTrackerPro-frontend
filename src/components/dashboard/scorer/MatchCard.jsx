@@ -55,12 +55,26 @@ export default function MatchCard({ match }) {
 };
 
   const handleAction = () => {
-  if (match.status === "completed") {
-    navigate(`/scorer/scoreboard/${match._id}`);
-  } else if (match.status === "live" || match.status === "upcoming") {
-    navigate(`/scorer/live/${match._id}`);
-  } else if (match.status === "abandoned" || match.status === "postponed") {
-    navigate(`/scorer/match/${match._id}`);
+  switch (match.status) {
+    case "upcoming":
+      navigate(`/scorer/${match._id}/start`);
+      break;
+
+    case "live":
+      navigate(`/scorer/${match._id}/score`);
+      break;
+
+    case "completed":
+      navigate(`/scorer/scoreboard/${match._id}`);
+      break;
+
+    case "abandoned":
+    case "postponed":
+      navigate(`/scorer/match/${match._id}`);
+      break;
+
+    default:
+      alert("Action not available");
   }
 };
 

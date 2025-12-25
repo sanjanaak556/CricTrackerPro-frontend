@@ -24,8 +24,6 @@ import Reports from "./pages/Admin/Reports";
 import ViewReportDetails from "./components/dashboard/admin/ViewReportDetails";
 import UsersAndRoles from "./pages/Admin/UsersAndRoles";
 
-// Scorer
-import ScorerDashboard from "./pages/Scorer/ScorerDashboard";
 
 // Viewer
 import ViewerDashboard from "./pages/Viewer/ViewerDashboard";
@@ -38,6 +36,10 @@ import FollowedTeams from "./pages/Viewer/FollowedTeams";
 import MatchPreview from "./pages/Viewer/MatchPreview";
 import MatchSummary from "./pages/Viewer/MatchSummary";
 import LiveMatch from "./pages/Viewer/LiveMatch";
+
+
+// Scorer
+import ScorerDashboard from "./pages/Scorer/ScorerDashboard";
 import ManageScorerMatches from "./pages/Scorer/ManageScorerMatches";
 
 
@@ -204,13 +206,24 @@ function App() {
           </ProtectedRoute>
         }
       />
-      {/*  */}
-       <Route
+      {/* MatchPreview (Scorer) */}
+      <Route
         path="/scorer/match/:matchId"
         element={
           <ProtectedRoute role="scorer">
             <DashboardLayout>
               <MatchPreview />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
+      {/* Settings */}
+      <Route
+        path="/scorer/settings"
+        element={
+          <ProtectedRoute role="scorer">
+            <DashboardLayout>
+              <Settings />
             </DashboardLayout>
           </ProtectedRoute>
         }

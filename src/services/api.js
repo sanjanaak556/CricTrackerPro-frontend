@@ -70,6 +70,12 @@ const api = {
     return res.data;
   },
 
+  // ---------- GENERIC PATCH ----------
+  patch: async (url, body) => {
+    const res = await apiClient.patch(url, body);
+    return res.data;
+  },
+
   // ---------- GENERIC DELETE ----------
   delete: async (url) => {
     const res = await apiClient.delete(url);

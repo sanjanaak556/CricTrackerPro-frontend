@@ -6,14 +6,21 @@ import { Link } from "react-router-dom";
 export default function Teams() {
   const [teams, setTeams] = useState([]);
   const [search, setSearch] = useState("");
-  const [following, setFollowing] = useState([]); // ⭐ store followed teams
+  const [following, setFollowing] = useState([]); //  store followed teams
 
   useEffect(() => {
     const fetchTeams = async () => {
       try {
         // Get all teams
         const teamRes = await api.get("/teams");
-        setTeams(teamRes || []);
+
+        // handle both old & new backend responses
+        const teamsArray =
+          Array.isArray(teamRes)
+            ? teamRes
+            : teamRes?.teams || teamRes?.data || [];
+
+        setTeams(teamsArray);
 
         // Get followed teams
         const followedRes = await api.get("/viewer/followed");
@@ -67,13 +74,13 @@ export default function Teams() {
 
   return (
     <div className="p-6 text-white space-y-6">
-     {/* Back */}
-          <Link
-            to="/viewer/dashboard"
-            className="inline-flex items-center text-blue-600 hover:text-blue-400"
-          >
-            <ArrowLeft className="w-5 h-5 mr-1" /> Back to Dashboard
-          </Link>
+      {/* Back */}
+      <Link
+        to="/viewer/dashboard"
+        className="inline-flex items-center text-blue-600 hover:text-blue-400"
+      >
+        <ArrowLeft className="w-5 h-5 mr-1" /> Back to Dashboard
+      </Link>
       <h1 className="text-3xl font-bold">Teams</h1>
 
       {/* Search Bar */}
@@ -116,7 +123,7 @@ export default function Teams() {
                 </p>
                 <p>
                   <span className="text-gray-400">Players:</span>{" "}
-                  {team.players?.length || 0}
+                  {team.playerCount ?? 0}
                 </p>
               </div>
 
@@ -127,10 +134,9 @@ export default function Teams() {
                   onClick={() => handleFollow(team._id)}
                   disabled={isFollowing}
                   className={`px-4 py-2 rounded-lg text-sm font-semibold transition
-                    ${
-                      isFollowing
-                        ? "bg-gray-600 cursor-not-allowed"
-                        : "bg-blue-600 hover:bg-blue-700"
+                    ${isFollowing
+                      ? "bg-gray-600 cursor-not-allowed"
+                      : "bg-blue-600 hover:bg-blue-700"
                     }`}
                 >
                   {isFollowing ? "Following" : "Follow"}
@@ -141,10 +147,9 @@ export default function Teams() {
                   onClick={() => handleUnfollow(team._id)}
                   disabled={!isFollowing}
                   className={`px-4 py-2 rounded-lg text-sm font-semibold transition
-                    ${
-                      !isFollowing
-                        ? "bg-gray-600 cursor-not-allowed"
-                        : "bg-red-600 hover:bg-red-700"
+                    ${!isFollowing
+                      ? "bg-gray-600 cursor-not-allowed"
+                      : "bg-red-600 hover:bg-red-700"
                     }`}
                 >
                   Unfollow

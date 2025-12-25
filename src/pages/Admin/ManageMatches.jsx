@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Eye } from "lucide-react";
+import CreateMatchModal from "../../components/dashboard/admin/CreateMatchModal";
+import EditMatchModal from "../../components/dashboard/admin/EditMatchModal";
 
 function ManageMatches() {
   const [matches, setMatches] = useState([]);
@@ -11,21 +13,10 @@ function ManageMatches() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
 
-  const [showCreateForm, setShowCreateForm] = useState(false);
-  const [showEditForm, setShowEditForm] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [editMatchId, setEditMatchId] = useState(null);
-
-  const [formData, setFormData] = useState({
-    matchNumber: "",
-    matchName: "",
-    matchType: "T20",
-    teamA: "",
-    teamB: "",
-    overs: 20,
-    venue: { name: "", city: "", groundType: "" },
-    umpires: [{ name: "", role: "on-field" }],
-    scorerId: "",
-  });
+  const [selectedMatch, setSelectedMatch] = useState(null);
 
   const navigate = useNavigate();
 
@@ -44,9 +35,14 @@ function ManageMatches() {
         api.get("/teams"),
         api.get("/users"),
       ]);
-      setMatches(matchesRes);
-      setTeams(teamsRes);
-      setUsers(usersRes);
+      
+      setMatches(matchesRes || []);
+      setTeams(Array.isArray(teamsRes) ? teamsRes : 
+               teamsRes?.teams ? teamsRes.teams : 
+               teamsRes?.data ? teamsRes.data : []);
+      setUsers(Array.isArray(usersRes) ? usersRes : 
+               usersRes?.users ? usersRes.users : 
+               usersRes?.data ? usersRes.data : []);
       setLoading(false);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -57,78 +53,41 @@ function ManageMatches() {
   const fetchMatches = async () => {
     try {
       const response = await api.get(`/matches?status=${filter}`);
-      setMatches(response);
+      setMatches(Array.isArray(response) ? response : 
+                 response?.matches ? response.matches : 
+                 response?.data ? response.data : []);
     } catch (error) {
       console.error("Error fetching matches:", error);
     }
   };
 
-  // CREATE MATCH SUBMIT
-  const handleCreateMatch = async (e) => {
-    e.preventDefault();
+  const handleCreateMatch = async (formData) => {
     try {
       await api.post("/matches", formData);
-      setShowCreateForm(false);
-
-      setFormData({
-        matchNumber: "",
-        matchName: "",
-        matchType: "T20",
-        teamA: "",
-        teamB: "",
-        overs: 20,
-        venue: { name: "", city: "", groundType: "" },
-        umpires: [{ name: "", role: "on-field" }],
-        scorerId: "",
-      });
-
+      setShowCreateModal(false);
       fetchMatches();
     } catch (error) {
       console.error("Error creating match:", error);
+      throw error;
     }
   };
 
-  // EDIT BUTTON CLICK
-  const handleEditMatch = (match) => {
+  const handleEditClick = (match) => {
+    setSelectedMatch(match);
     setEditMatchId(match._id);
-    setShowEditForm(true);
-    setShowCreateForm(false);
-
-    setFormData({
-      matchNumber: match.matchNumber,
-      matchName: match.matchName,
-      matchType: match.matchType,
-      teamA: match.teamA?._id,
-      teamB: match.teamB?._id,
-      overs: match.overs,
-      venue: {
-        name: match.venue?.name || "",
-        city: match.venue?.city || "",
-        groundType: match.venue?.groundType || "",
-      },
-      umpires:
-        Array.isArray(match.umpires) && match.umpires.length > 0
-          ? match.umpires.map((u) => ({
-              name: u.name || "",
-              role: u.role || "on-field",
-            }))
-          : [{ name: "", role: "on-field" }],
-      scorerId: match.scorerId?._id || "",
-    });
+    setShowEditModal(true);
   };
 
-  // UPDATE MATCH SUBMIT
-  const handleUpdateMatch = async (e) => {
-    e.preventDefault();
-
+  const handleUpdateMatch = async (formData) => {
     try {
       await api.put(`/matches/${editMatchId}`, formData);
-      setShowEditForm(false);
+      setShowEditModal(false);
       setEditMatchId(null);
-
+      setSelectedMatch(null);
       fetchMatches();
     } catch (error) {
       console.error("Error updating match:", error);
+      throw error;
     }
   };
 
@@ -141,7 +100,6 @@ function ManageMatches() {
     }
   };
 
-  // DELETE MATCH (only for upcoming)
   const handleDeleteMatch = async (matchId) => {
     if (!window.confirm("Are you sure you want to delete this match?")) return;
     try {
@@ -194,10 +152,7 @@ function ManageMatches() {
         </h1>
 
         <button
-          onClick={() => {
-            setShowCreateForm(true);
-            setShowEditForm(false);
-          }}
+          onClick={() => setShowCreateModal(true)}
           className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
         >
           Create New Match
@@ -221,516 +176,285 @@ function ManageMatches() {
         ))}
       </div>
 
-      {/* CREATE FORM */}
-      {showCreateForm && (
-        <FormComponent
-          title="Create New Match"
-          formData={formData}
-          setFormData={setFormData}
-          teams={teams}
-          scorers={scorers}
-          handleSubmit={handleCreateMatch}
-          onCancel={() => setShowCreateForm(false)}
-        />
-      )}
+      {/* CREATE MATCH MODAL */}
+      <CreateMatchModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onSubmit={handleCreateMatch}
+        teams={teams}
+        scorers={scorers}
+      />
 
-      {/* EDIT FORM */}
-      {showEditForm && (
-        <FormComponent
-          title="Edit Match"
-          formData={formData}
-          setFormData={setFormData}
-          teams={teams}
-          scorers={scorers}
-          handleSubmit={handleUpdateMatch}
-          onCancel={() => {
-            setShowEditForm(false);
+      {/* EDIT MATCH MODAL */}
+      {selectedMatch && (
+        <EditMatchModal
+          isOpen={showEditModal}
+          onClose={() => {
+            setShowEditModal(false);
+            setSelectedMatch(null);
             setEditMatchId(null);
           }}
+          onSubmit={handleUpdateMatch}
+          match={selectedMatch}
+          teams={teams}
+          scorers={scorers}
         />
       )}
 
       {/* MATCHES LIST */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {matches.map((match) => (
-          <div
+          <MatchCard
             key={match._id}
-            className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"
-          >
-            <div className="flex justify-between items-start mb-4">
-              <div className="flex items-center gap-3">
-                {/* Team A logo */}
-                <img
-                  src={match.teamA?.logo || "/default-team.png"}
-                  alt={match.teamA?.name || "Team A"}
-                  className="h-10 w-10 rounded object-cover"
-                />
-
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                    {match.matchName}
-                  </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
-                    Match #{match.matchNumber}
-                  </p>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
-                    {match.matchType} • {match.overs} overs
-                  </p>
-                </div>
-
-                {/* Team B logo */}
-                <img
-                  src={match.teamB?.logo || "/default-team.png"}
-                  alt={match.teamB?.name || "Team B"}
-                  className="h-10 w-10 rounded object-cover ml-3"
-                />
-              </div>
-
-              <span
-                className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                  match.status
-                )}`}
-              >
-                {match.status}
-              </span>
-            </div>
-
-            <div className="mb-4">
-              <p className="text-sm text-gray-700 dark:text-gray-300">
-                <span className="font-medium">{match.teamA?.name}</span> vs{" "}
-                <span className="font-medium">{match.teamB?.name}</span>
-              </p>
-
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                {match.venue?.name}, {match.venue?.city}
-              </p>
-
-              {match.venue?.groundType && (
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Ground Type: {match.venue.groundType}
-                </p>
-              )}
-
-              {match.scorerId && (
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Scorer: {match.scorerId.name}
-                </p>
-              )}
-            </div>
-
-            {/* Umpires list */}
-            {Array.isArray(match.umpires) && match.umpires.length > 0 && (
-              <div className="mb-4">
-                <p className="text-sm font-medium dark:text-gray-200">
-                  Umpires:
-                </p>
-                <ul className="text-sm text-gray-600 dark:text-gray-300 list-disc ml-5">
-                  {match.umpires.map((u, idx) => (
-                    <li key={idx}>
-                      {u.name} {u.role ? `(${u.role})` : ""}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {match.status === "live" && (
-              <div className="mb-4 p-3 bg-green-50 dark:bg-green-900 rounded-lg">
-                <p className="text-sm font-medium text-green-800 dark:text-green-200">
-                  Current Score: {match.currentScore?.runs}/
-                  {match.currentScore?.wickets} ({match.currentScore?.overs})
-                </p>
-              </div>
-            )}
-
-            <div className="flex flex-wrap gap-2">
-              <button
-                onClick={() => navigate(`/admin/matches/view/${match._id}`)}
-                className="bg-gray-700 text-pink-300 px-3 py-1 rounded text-sm hover:bg-gray-800 flex items-center gap-1"
-              >
-                <Eye className="w-5 h-5 mr-1" /> 
-              </button>
-
-              {/* EDIT BUTTON ONLY FOR UPCOMING */}
-              {match.status === "upcoming" && (
-                <>
-                  <button
-                    onClick={() => handleEditMatch(match)}
-                    className="bg-yellow-500 text-white px-3 py-1 rounded text-sm hover:bg-yellow-600"
-                  >
-                    Edit
-                  </button>
-
-                  {/* DELETE BUTTON ONLY FOR UPCOMING */}
-                  <button
-                    onClick={() => handleDeleteMatch(match._id)}
-                    className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700"
-                  >
-                    Delete
-                  </button>
-                </>
-              )}
-
-              {match.status === "live" && (
-                <>
-                  <button
-                    onClick={() => handleViewLive(match._id)}
-                    className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700"
-                  >
-                    View Live
-                  </button>
-
-                  <button
-                    onClick={() => handleEndMatch(match._id)}
-                    className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700"
-                  >
-                    End Match
-                  </button>
-                </>
-              )}
-
-              {match.status === "completed" && (
-                <button
-                  onClick={() => handleViewSummary(match._id)}
-                  className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
-                >
-                  View Summary
-                </button>
-              )}
-            </div>
-          </div>
+            match={match}
+            onEdit={handleEditClick}
+            onDelete={handleDeleteMatch}
+            onEndMatch={handleEndMatch}
+            onViewLive={handleViewLive}
+            onViewSummary={handleViewSummary}
+            getStatusColor={getStatusColor}
+          />
         ))}
       </div>
 
       {matches.length === 0 && (
         <div className="text-center text-gray-500 dark:text-gray-300 py-8">
-          No matches found. Click “Create New Match” to add your first match.
+          No matches found. Click "Create New Match" to add your first match.
         </div>
       )}
     </div>
   );
 }
 
-/* ---- REUSABLE FORM (USED FOR CREATE + EDIT) ---- */
+export default ManageMatches;
 
-function FormComponent({
-  title,
-  formData,
-  setFormData,
-  teams,
-  scorers,
-  handleSubmit,
-  onCancel,
+// Match Card Component
+function MatchCard({ 
+  match, 
+  onEdit, 
+  onDelete, 
+  onEndMatch, 
+  onViewLive, 
+  onViewSummary,
+  getStatusColor 
 }) {
-  // Helpers to manage multiple umpires
-  const updateUmpire = (idx, key, value) => {
-    const copy = [...(formData.umpires || [])];
-    copy[idx] = {
-      ...(copy[idx] || { name: "", role: "on-field" }),
-      [key]: value,
-    };
-    setFormData({ ...formData, umpires: copy });
+  const navigate = useNavigate();
+
+  // Helper function to get toss winner name
+  const getTossWinnerName = () => {
+    if (!match.tossWinner) return null;
+    
+    // If tossWinner is an object with name property (populated)
+    if (typeof match.tossWinner === 'object' && match.tossWinner.name) {
+      return match.tossWinner.name;
+    }
+    
+    // If tossWinner is just an ID string, try to match with teamA or teamB
+    const tossWinnerId = match.tossWinner.toString ? match.tossWinner.toString() : match.tossWinner;
+    const teamAId = match.teamA?._id?.toString();
+    const teamBId = match.teamB?._id?.toString();
+    
+    if (tossWinnerId === teamAId) {
+      return match.teamA?.name || "Team A";
+    }
+    if (tossWinnerId === teamBId) {
+      return match.teamB?.name || "Team B";
+    }
+    
+    // Fallback: check if team objects have _id property
+    if (match.teamA && match.teamA._id && tossWinnerId === match.teamA._id.toString()) {
+      return match.teamA.name;
+    }
+    
+    if (match.teamB && match.teamB._id && tossWinnerId === match.teamB._id.toString()) {
+      return match.teamB.name;
+    }
+    
+    return "Unknown Team";
   };
 
-  const addUmpire = () => {
-    const copy = [...(formData.umpires || [])];
-    copy.push({ name: "", role: "on-field" });
-    setFormData({ ...formData, umpires: copy });
-  };
-
-  const removeUmpire = (idx) => {
-    const copy = [...(formData.umpires || [])];
-    copy.splice(idx, 1);
-    setFormData({
-      ...formData,
-      umpires: copy.length ? copy : [{ name: "", role: "on-field" }],
-    });
-  };
+  const tossWinnerName = getTossWinnerName();
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md w-full mb-6">
-      <h2 className="text-lg font-semibold mb-4 dark:text-white">{title}</h2>
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Input
-            label="Match Number"
-            value={formData.matchNumber}
-            onChange={(v) => setFormData({ ...formData, matchNumber: v })}
+    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+      <div className="flex justify-between items-start mb-4">
+        <div className="flex items-center gap-3">
+          {/* Team A logo */}
+          <img
+            src={match.teamA?.logo || "/default-team.png"}
+            alt={match.teamA?.name || "Team A"}
+            className="h-10 w-10 rounded object-cover"
           />
-
-          <Input
-            label="Match Name"
-            value={formData.matchName}
-            onChange={(v) => setFormData({ ...formData, matchName: v })}
-          />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Select
-            label="Match Type"
-            value={formData.matchType}
-            onChange={(v) => setFormData({ ...formData, matchType: v })}
-            options={[
-              { value: "T20", label: "T20" },
-              { value: "ODI", label: "ODI" },
-              { value: "Test", label: "Test" },
-            ]}
-          />
-
-          <Input
-            label="Overs"
-            type="number"
-            value={formData.overs}
-            onChange={(v) => setFormData({ ...formData, overs: Number(v) })}
-          />
-        </div>
-
-        {/* TEAMS with logo preview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Team A
-            </label>
-            <div className="flex items-center gap-3 mt-1">
-              <select
-                value={formData.teamA}
-                onChange={(e) =>
-                  setFormData({ ...formData, teamA: e.target.value })
-                }
-                className="block w-full px-3 py-2 rounded-md bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
-                required
-              >
-                <option value="">Select team</option>
-                {teams.map((t) => (
-                  <option key={t._id} value={t._id}>
-                    {t.name}
-                  </option>
-                ))}
-              </select>
-
-              {/* preview */}
-              <img
-                src={
-                  teams.find((t) => t._id === formData.teamA)?.logo ||
-                  "/default-team.png"
-                }
-                alt="team-a"
-                className="h-10 w-10 rounded object-cover"
-              />
-            </div>
-          </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Team B
-            </label>
-            <div className="flex items-center gap-3 mt-1">
-              <select
-                value={formData.teamB}
-                onChange={(e) =>
-                  setFormData({ ...formData, teamB: e.target.value })
-                }
-                className="block w-full px-3 py-2 rounded-md bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
-                required
-              >
-                <option value="">Select team</option>
-                {teams.map((t) => (
-                  <option key={t._id} value={t._id}>
-                    {t.name}
-                  </option>
-                ))}
-              </select>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              {match.matchName}
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-300">
+              Match #{match.matchNumber}
+            </p>
+            <p className="text-sm text-gray-600 dark:text-gray-300">
+              {match.matchType} • {match.overs} overs
+            </p>
+          </div>
 
-              {/* preview */}
-              <img
-                src={
-                  teams.find((t) => t._id === formData.teamB)?.logo ||
-                  "/default-team.png"
-                }
-                alt="team-b"
-                className="h-10 w-10 rounded object-cover"
-              />
+          {/* Team B logo */}
+          <img
+            src={match.teamB?.logo || "/default-team.png"}
+            alt={match.teamB?.name || "Team B"}
+            className="h-10 w-10 rounded object-cover ml-3"
+          />
+        </div>
+
+        <span
+          className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+            match.status
+          )}`}
+        >
+          {match.status}
+        </span>
+      </div>
+
+      <div className="mb-4">
+        <p className="text-sm text-gray-700 dark:text-gray-300">
+          <span className="font-medium">{match.teamA?.name}</span> vs{" "}
+          <span className="font-medium">{match.teamB?.name}</span>
+        </p>
+
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          {match.venue?.name}, {match.venue?.city}
+        </p>
+
+        {match.venue?.groundType && (
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Ground Type: {match.venue.groundType}
+          </p>
+        )}
+
+        {match.scorerId && (
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Scorer: {match.scorerId.name}
+          </p>
+        )}
+
+        {/* Show toss info if available */}
+        {match.tossWinner && tossWinnerName && (
+          <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900 rounded">
+            <div className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-1">
+              Toss Information
+            </div>
+            <div className="text-sm text-blue-700 dark:text-blue-300">
+              <span className="font-medium">Winner:</span> {tossWinnerName}
+            </div>
+            <div className="text-sm text-blue-700 dark:text-blue-300">
+              <span className="font-medium">Decision:</span>{" "}
+              <span className="capitalize font-medium">{match.electedTo}</span>
             </div>
           </div>
-        </div>
+        )}
+      </div>
 
-        {/* VENUE */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Input
-            label="Venue Name"
-            value={formData.venue.name}
-            onChange={(v) =>
-              setFormData({
-                ...formData,
-                venue: { ...formData.venue, name: v },
-              })
-            }
-          />
-
-          <Input
-            label="City"
-            value={formData.venue.city}
-            onChange={(v) =>
-              setFormData({
-                ...formData,
-                venue: { ...formData.venue, city: v },
-              })
-            }
-          />
-
-          <Select
-            label="Ground Type"
-            value={formData.venue.groundType}
-            onChange={(v) =>
-              setFormData({
-                ...formData,
-                venue: { ...formData.venue, groundType: v },
-              })
-            }
-            options={[
-              { value: "Turf Pitch", label: "Turf Pitch" },
-              { value: "Matting Pitch", label: "Matting Pitch" },
-              { value: "Concrete Pitch", label: "Concrete Pitch" },
-              { value: "Astro Pitch", label: "Astro Pitch" },
-              { value: "Hybrid Pitch", label: "Hybrid Pitch" },
-              {
-                value: "International Stadium",
-                label: "International Stadium",
-              },
-              { value: "Club Ground", label: "Club Groung" },
-              {
-                value: "School/College Ground",
-                label: "School/College Ground",
-              },
-              { value: "Academy Ground", label: "Academy Ground" },
-              { value: "Hybrid Pitch", label: "Hybrid Pitch" },
-              { value: "Box Cricket Ground", label: "Box Cricket Ground" },
-              {
-                value: "Indoor Cricket Ground",
-                label: "Indoor Cricket Ground",
-              },
-              { value: "Other", label: "Other" },
-            ]}
-          />
-        </div>
-
-        {/* Umpires (multi) */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Umpires
-          </label>
-
-          <div className="space-y-2 mt-2">
-            {(formData.umpires || []).map((ump, idx) => (
-              <div key={idx} className="flex gap-2 items-center">
-                <input
-                  type="text"
-                  placeholder="Umpire name"
-                  value={ump.name}
-                  onChange={(e) => updateUmpire(idx, "name", e.target.value)}
-                  className="flex-1 px-3 py-2 rounded-md bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
-                  required
-                />
-
-                <select
-                  value={ump.role}
-                  onChange={(e) => updateUmpire(idx, "role", e.target.value)}
-                  className="px-3 py-2 rounded-md bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
-                >
-                  <option value="on-field">On-field</option>
-                  <option value="third-umpire">Third Umpire</option>
-                </select>
-
-                <button
-                  type="button"
-                  onClick={() => removeUmpire(idx)}
-                  className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
-                >
-                  Remove
-                </button>
-              </div>
+      {/* Umpires list */}
+      {Array.isArray(match.umpires) && match.umpires.length > 0 && (
+        <div className="mb-4">
+          <p className="text-sm font-medium dark:text-gray-200">
+            Umpires:
+          </p>
+          <ul className="text-sm text-gray-600 dark:text-gray-300 list-disc ml-5">
+            {match.umpires.map((u, idx) => (
+              <li key={idx}>
+                {u.name} {u.role ? `(${u.role})` : ""}
+              </li>
             ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Current Score for live matches */}
+      {match.status === "live" && match.currentScore && (
+        <div className="mb-4 p-3 bg-green-50 dark:bg-green-900 rounded-lg">
+          <div className="flex justify-between items-center">
+            <div>
+              <p className="text-sm font-medium text-green-800 dark:text-green-200">
+                Current Score
+              </p>
+              <p className="text-2xl font-bold text-green-800 dark:text-green-200">
+                {match.currentScore.runs}/{match.currentScore.wickets}
+              </p>
+              <p className="text-sm text-green-700 dark:text-green-300">
+                Overs: {match.currentScore.overs}
+              </p>
+            </div>
+            {/* Show target if second innings */}
+            {match.currentScore.target && (
+              <div className="text-right">
+                <p className="text-sm font-medium text-green-800 dark:text-green-200">
+                  Target: {match.currentScore.target}
+                </p>
+                <p className="text-sm text-green-700 dark:text-green-300">
+                  Need {match.currentScore.target - match.currentScore.runs} runs
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      <div className="flex flex-wrap gap-2">
+        <button
+          onClick={() => navigate(`/admin/matches/view/${match._id}`)}
+          className="bg-gray-700 text-pink-300 px-3 py-1 rounded text-sm hover:bg-gray-800 flex items-center gap-1"
+        >
+          <Eye className="w-5 h-5 mr-1" /> View
+        </button>
+
+        {/* EDIT BUTTON ONLY FOR UPCOMING */}
+        {match.status === "upcoming" && (
+          <>
+            <button
+              onClick={() => onEdit(match)}
+              className="bg-yellow-500 text-white px-3 py-1 rounded text-sm hover:bg-yellow-600"
+            >
+              Edit
+            </button>
+
+            {/* DELETE BUTTON ONLY FOR UPCOMING */}
+            <button
+              onClick={() => onDelete(match._id)}
+              className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700"
+            >
+              Delete
+            </button>
+          </>
+        )}
+
+        {match.status === "live" && (
+          <>
+            <button
+              onClick={() => onViewLive(match._id)}
+              className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700"
+            >
+              View Live
+            </button>
 
             <button
-              type="button"
-              onClick={addUmpire}
-              className="mt-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+              onClick={() => onEndMatch(match._id)}
+              className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700"
             >
-              Add Umpire
+              End Match
             </button>
-          </div>
-        </div>
+          </>
+        )}
 
-        <Select
-          label="Assign Scorer"
-          value={formData.scorerId}
-          onChange={(v) => setFormData({ ...formData, scorerId: v })}
-          options={scorers.map((s) => ({
-            value: s._id,
-            label: s.name,
-          }))}
-        />
-
-        {/* BUTTONS */}
-        <div className="flex space-x-2">
-          <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-            {title.includes("Edit") ? "Update Match" : "Create Match"}
-          </button>
-
+        {match.status === "completed" && (
           <button
-            type="button"
-            onClick={onCancel}
-            className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600"
+            onClick={() => onViewSummary(match._id)}
+            className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
           >
-            Cancel
+            View Summary
           </button>
-        </div>
-      </form>
+        )}
+      </div>
     </div>
   );
 }
-
-/* INPUT COMPONENT */
-function Input({ label, value, onChange, type = "text" }) {
-  return (
-    <div>
-      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-        {label}
-      </label>
-      <input
-        type={type}
-        required
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="mt-1 block w-full px-3 py-2 rounded-md bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 focus:ring-blue-500 focus:border-blue-500 outline-none"
-      />
-    </div>
-  );
-}
-
-/* SELECT COMPONENT */
-function Select({ label, value, onChange, options = [] }) {
-  return (
-    <div>
-      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-        {label}
-      </label>
-      <select
-        required
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="mt-1 block w-full px-3 py-2 rounded-md bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 focus:ring-blue-500 focus:border-blue-500 outline-none"
-      >
-        <option value="">Select</option>
-        {options.map((op, idx) => (
-          <option key={idx} value={op.value}>
-            {op.label}
-          </option>
-        ))}
-      </select>
-    </div>
-  );
-}
-
-export default ManageMatches;

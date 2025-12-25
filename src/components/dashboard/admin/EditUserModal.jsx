@@ -28,7 +28,8 @@ const EditUserModal = ({ user, onClose, onUpdated }) => {
               type="text"
               value={user.name}
               disabled
-              className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+              className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-600 dark:text-white cursor-not-allowed
+"
             />
           </div>
 
@@ -41,7 +42,7 @@ const EditUserModal = ({ user, onClose, onUpdated }) => {
               type="text"
               value={user.email}
               disabled
-              className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+              className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-600 dark:text-white cursor-not-allowed"
             />
           </div>
 
@@ -51,7 +52,7 @@ const EditUserModal = ({ user, onClose, onUpdated }) => {
               Role
             </label>
             <select
-              className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+              className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-600 dark:text-white cursor-pointer"
               value={role}
               onChange={(e) => setRole(e.target.value)}
             >
@@ -65,14 +66,14 @@ const EditUserModal = ({ user, onClose, onUpdated }) => {
         {/* Buttons */}
         <div className="flex justify-end gap-3 mt-6">
           <button
-            className="px-4 py-2 border rounded-lg dark:border-gray-600"
+            className="px-4 py-2 border rounded-lg dark:border-gray-600 cursor-pointer"
             onClick={onClose}
           >
             Cancel
           </button>
 
           <button
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg cursor-pointer"
             onClick={handleUpdate}
           >
             Update
