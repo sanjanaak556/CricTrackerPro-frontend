@@ -52,13 +52,13 @@ const EditUserModal = ({ user, onClose, onUpdated }) => {
               Role
             </label>
             <select
-              className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-600 dark:text-white cursor-pointer"
+              className="w-full px-3 py-2 border rounded-lg bg-base-100 dark:bg-base-200 text-gray-900 dark:text-white cursor-pointer"
               value={role}
               onChange={(e) => setRole(e.target.value)}
             >
-              <option value="admin">Admin</option>
-              <option value="scorer">Scorer</option>
-              <option value="viewer">Viewer</option>
+              <option className="bg-base-100 dark:bg-base-200 text-gray-900 dark:text-white" value="admin">Admin</option>
+              <option className="bg-base-100 dark:bg-base-200 text-gray-900 dark:text-white" value="scorer">Scorer</option>
+              <option className="bg-base-100 dark:bg-base-200 text-gray-900 dark:text-white" value="viewer">Viewer</option>
             </select>
           </div>
         </div>

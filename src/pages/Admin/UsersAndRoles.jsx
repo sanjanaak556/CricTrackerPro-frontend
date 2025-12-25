@@ -80,14 +80,14 @@ const UsersAndRoles = () => {
         />
 
         <select
-          className="px-4 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+          className="px-4 py-2 border rounded-lg bg-base-100 dark:bg-base-200 text-gray-900 dark:text-white"
           value={roleFilter}
           onChange={(e) => setRoleFilter(e.target.value)}
         >
-          <option value="all">All Roles</option>
-          <option value="admin">Admin</option>
-          <option value="scorer">Scorer</option>
-          <option value="viewer">Viewer</option>
+          <option className="bg-base-100 dark:bg-base-200 text-gray-900 dark:text-white" value="all">All Roles</option>
+          <option className="bg-base-100 dark:bg-base-200 text-gray-900 dark:text-white" value="admin">Admin</option>
+          <option className="bg-base-100 dark:bg-base-200 text-gray-900 dark:text-white" value="scorer">Scorer</option>
+          <option className="bg-base-100 dark:bg-base-200 text-gray-900 dark:text-white" value="viewer">Viewer</option>
         </select>
       </div>
 

@@ -41,7 +41,10 @@ import LiveMatch from "./pages/Viewer/LiveMatch";
 // Scorer
 import ScorerDashboard from "./pages/Scorer/ScorerDashboard";
 import ManageScorerMatches from "./pages/Scorer/ManageScorerMatches";
-
+import StartScoring from "./pages/Scorer/StartScoring";
+import ScoreMatch from "./pages/Scorer/ScoreMatch";
+import Scoreboard from "./pages/Scorer/Scoreboard";
+import ScorerMatchHistory from "./pages/Scorer/MatchHistory";
 
 
 function App() {
@@ -213,6 +216,62 @@ function App() {
           <ProtectedRoute role="scorer">
             <DashboardLayout>
               <MatchPreview />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
+      {/* Start scoring flow (toss -> innings -> start) */}
+      <Route
+        path="/scorer/start/:matchId"
+        element={
+          <ProtectedRoute role="scorer">
+            <DashboardLayout>
+              <StartScoring />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
+      {/* Scoring panel */}
+      <Route
+        path="/scorer/score/:matchId"
+        element={
+          <ProtectedRoute role="scorer">
+            <DashboardLayout>
+              <ScoreMatch />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Scoreboard (list + detail) */}
+      <Route
+        path="/scorer/scoreboard"
+        element={
+          <ProtectedRoute role="scorer">
+            <DashboardLayout>
+              <Scoreboard />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/scorer/scoreboard/:matchId"
+        element={
+          <ProtectedRoute role="scorer">
+            <DashboardLayout>
+              <Scoreboard />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Match History (Scorer) */}
+      <Route
+        path="/scorer/history"
+        element={
+          <ProtectedRoute role="scorer">
+            <DashboardLayout>
+              <ScorerMatchHistory />
             </DashboardLayout>
           </ProtectedRoute>
         }

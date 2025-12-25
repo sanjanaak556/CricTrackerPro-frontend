@@ -66,7 +66,7 @@ export default function MatchCard({ match, onMatchUpdate }) {
         break;
 
       case "live":
-        navigate(`/scorer/${match._id}/score`);
+        navigate(`/scorer/score/${match._id}`);
         break;
 
       case "completed":

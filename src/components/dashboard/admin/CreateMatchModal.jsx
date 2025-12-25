@@ -231,10 +231,10 @@ function CreateMatchModal({ isOpen, onClose, onSubmit, teams, scorers }) {
                     <select
                       value={ump.role}
                       onChange={(e) => updateUmpire(idx, "role", e.target.value)}
-                      className="px-3 py-2 rounded-md bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
+                      className="px-3 py-2 rounded-md bg-base-100 dark:bg-base-200 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                     >
-                      <option value="on-field">On-field</option>
-                      <option value="third-umpire">Third Umpire</option>
+                      <option className="bg-base-100 dark:bg-base-200 text-gray-900 dark:text-white" value="on-field">On-field</option>
+                      <option className="bg-base-100 dark:bg-base-200 text-gray-900 dark:text-white" value="third-umpire">Third Umpire</option>
                     </select>
 
                     <button
@@ -321,11 +321,11 @@ function SelectField({ label, value, onChange, options = [] }) {
         required
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="mt-1 block w-full px-3 py-2 rounded-md bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 focus:ring-blue-500 focus:border-blue-500 outline-none"
+        className="mt-1 block w-full px-3 py-2 rounded-md bg-base-100 dark:bg-base-200 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500 outline-none"
       >
-        <option value="">Select</option>
+        <option className="bg-base-100 dark:bg-base-200 text-gray-900 dark:text-white" value="">Select</option>
         {options.map((op, idx) => (
-          <option key={idx} value={op.value}>
+          <option className="bg-base-100 dark:bg-base-200 text-gray-900 dark:text-white" key={idx} value={op.value}>
             {op.label}
           </option>
         ))}
@@ -344,12 +344,12 @@ function TeamSelect({ label, value, onChange, teams }) {
         <select
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="block w-full px-3 py-2 rounded-md bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
+          className="block w-full px-3 py-2 rounded-md bg-base-100 dark:bg-base-200 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
           required
         >
-          <option value="">Select team</option>
+          <option className="bg-base-100 dark:bg-base-200 text-gray-900 dark:text-white" value="">Select team</option>
           {Array.isArray(teams) && teams.map((t) => (
-            <option key={t._id} value={t._id}>
+            <option className="bg-base-100 dark:bg-base-200 text-gray-900 dark:text-white" key={t._id} value={t._id}>
               {t.name}
             </option>
           ))}

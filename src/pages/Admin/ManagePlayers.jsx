@@ -585,22 +585,18 @@ function SelectField({ label, name, value, onChange, options }) {
         value={value}
         onChange={onChange}
         required
-        className="mt-1 block w-full px-3 py-2 rounded-md 
-        bg-gray-50 dark:bg-gray-700 
-        border border-gray-300 dark:border-gray-600
-        text-gray-900 dark:text-gray-100
-        focus:ring-blue-500 focus:border-blue-500"
+        className="mt-1 block w-full px-3 py-2 rounded-md bg-base-100 dark:bg-base-200 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500"
       >
-        <option value="">Select</option>
+        <option className="bg-base-100 dark:bg-base-200 text-gray-900 dark:text-white" value="">Select</option>
 
         {Array.isArray(options) &&
           options.map((opt, i) =>
             typeof opt === "string" ? (
-              <option key={i} value={opt}>
+              <option className="bg-base-100 dark:bg-base-200 text-gray-900 dark:text-white" key={i} value={opt}>
                 {opt}
               </option>
             ) : (
-              <option key={opt.value} value={opt.value}>
+              <option className="bg-base-100 dark:bg-base-200 text-gray-900 dark:text-white" key={opt.value} value={opt.value}>
                 {opt.label}
               </option>
             )

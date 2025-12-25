@@ -48,7 +48,7 @@ export default function LiveMatchBanner({ match }) {
 
       {/* Action */}
       <button
-        onClick={() => navigate(`/scorer/live/${match._id}`)}
+        onClick={() => navigate(`/scorer/score/${match._id}`)}
         className="bg-white text-red-600 font-semibold px-5 py-2 rounded-lg hover:bg-gray-100 transition self-start md:self-auto cursor-pointer"
       >
         Continue Scoring

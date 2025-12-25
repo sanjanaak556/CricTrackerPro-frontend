@@ -33,15 +33,14 @@ const TossWinnerModal = ({
       const updateData = {
         tossWinner: tossData.tossWinner,
         electedTo: tossData.electedTo,
-        status: "live", // Update status to live
       };
 
       // Send update request
-      await api.put(`/matches/${matchId}`, updateData);
+      await api.put(`/matches/${matchId}/start`, updateData);
       
       // Call success callback
       if (onSuccess) {
-        onSuccess(updateData);
+        onSuccess({ ...updateData, status: "live" });
       }
       
       // Close modal

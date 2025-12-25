@@ -76,11 +76,11 @@ export default function ReportForm({ title, onSubmit, onCancel, initialData }) {
                 updateField("matchName", selected?.matchName ?? "");
                 updateField("matchNumber", selected?.matchNumber ?? "");
               }}
-              className="mt-1 block w-full px-3 py-2 rounded-md bg-gray-50 dark:bg-gray-700"
+              className="mt-1 block w-full px-3 py-2 rounded-md bg-base-100 dark:bg-base-200 text-gray-900 dark:text-white"
             >
-              <option value="">Select match</option>
+              <option className="bg-base-100 dark:bg-base-200 text-gray-900 dark:text-white" value="">Select match</option>
               {matches.map((m) => (
-                <option key={m._id} value={m._id}>
+                <option className="bg-base-100 dark:bg-base-200 text-gray-900 dark:text-white" key={m._id} value={m._id}>
                   {m.matchName} (#{m.matchNumber})
                 </option>
               ))}
@@ -93,11 +93,11 @@ export default function ReportForm({ title, onSubmit, onCancel, initialData }) {
             <select
               value={form.winnerTeamId}
               onChange={(e) => updateField("winnerTeamId", e.target.value)}
-              className="mt-1 block w-full px-3 py-2 rounded-md bg-gray-50 dark:bg-gray-700"
+              className="mt-1 block w-full px-3 py-2 rounded-md bg-base-100 dark:bg-base-200 text-gray-900 dark:text-white"
             >
-              <option value="">Select winner</option>
+              <option className="bg-base-100 dark:bg-base-200 text-gray-900 dark:text-white" value="">Select winner</option>
               {teams.map((t) => (
-                <option key={t._id} value={t._id}>
+                <option className="bg-base-100 dark:bg-base-200 text-gray-900 dark:text-white" key={t._id} value={t._id}>
                   {t.name}
                 </option>
               ))}
@@ -110,12 +110,12 @@ export default function ReportForm({ title, onSubmit, onCancel, initialData }) {
             <select
               value={form.winType}
               onChange={(e) => updateField("winType", e.target.value)}
-              className="mt-1 block w-full px-3 py-2 rounded-md bg-gray-50 dark:bg-gray-700"
+              className="mt-1 block w-full px-3 py-2 rounded-md bg-base-100 dark:bg-base-200 text-gray-900 dark:text-white"
             >
-              <option value="">Select</option>
-              <option value="runs">Runs</option>
-              <option value="wickets">Wickets</option>
-              <option value="superover">Super Over</option>
+              <option className="bg-base-100 dark:bg-base-200 text-gray-900 dark:text-white" value="">Select</option>
+              <option className="bg-base-100 dark:bg-base-200 text-gray-900 dark:text-white" value="runs">Runs</option>
+              <option className="bg-base-100 dark:bg-base-200 text-gray-900 dark:text-white" value="wickets">Wickets</option>
+              <option className="bg-base-100 dark:bg-base-200 text-gray-900 dark:text-white" value="superover">Super Over</option>
             </select>
           </label>
 
@@ -138,11 +138,11 @@ export default function ReportForm({ title, onSubmit, onCancel, initialData }) {
             <select
               value={form.playerOfTheMatch}
               onChange={(e) => updateField("playerOfTheMatch", e.target.value)}
-              className="mt-1 block w-full px-3 py-2 rounded-md bg-gray-50 dark:bg-gray-700"
+              className="mt-1 block w-full px-3 py-2 rounded-md bg-base-100 dark:bg-base-200 text-gray-900 dark:text-white"
             >
-              <option value="">Select player</option>
+              <option className="bg-base-100 dark:bg-base-200 text-gray-900 dark:text-white" value="">Select player</option>
               {players.map((p) => (
-                <option key={p._id} value={p._id}>
+                <option className="bg-base-100 dark:bg-base-200 text-gray-900 dark:text-white" key={p._id} value={p._id}>
                   {p.name}
                 </option>
               ))}
@@ -155,11 +155,11 @@ export default function ReportForm({ title, onSubmit, onCancel, initialData }) {
             <select
               value={form.topScorer}
               onChange={(e) => updateField("topScorer", e.target.value)}
-              className="mt-1 block w-full px-3 py-2 rounded-md bg-gray-50 dark:bg-gray-700"
+              className="mt-1 block w-full px-3 py-2 rounded-md bg-base-100 dark:bg-base-200 text-gray-900 dark:text-white"
             >
-              <option value="">Select player</option>
+              <option className="bg-base-100 dark:bg-base-200 text-gray-900 dark:text-white" value="">Select player</option>
               {players.map((p) => (
-                <option key={p._id} value={p._id}>
+                <option className="bg-base-100 dark:bg-base-200 text-gray-900 dark:text-white" key={p._id} value={p._id}>
                   {p.name}
                 </option>
               ))}
@@ -172,11 +172,11 @@ export default function ReportForm({ title, onSubmit, onCancel, initialData }) {
             <select
               value={form.bestBowler}
               onChange={(e) => updateField("bestBowler", e.target.value)}
-              className="mt-1 block w-full px-3 py-2 rounded-md bg-gray-50 dark:bg-gray-700"
+              className="mt-1 block w-full px-3 py-2 rounded-md bg-base-100 dark:bg-base-200 text-gray-900 dark:text-white"
             >
-              <option value="">Select player</option>
+              <option className="bg-base-100 dark:bg-base-200 text-gray-900 dark:text-white" value="">Select player</option>
               {players.map((p) => (
-                <option key={p._id} value={p._id}>
+                <option className="bg-base-100 dark:bg-base-200 text-gray-900 dark:text-white" key={p._id} value={p._id}>
                   {p.name}
                 </option>
               ))}
