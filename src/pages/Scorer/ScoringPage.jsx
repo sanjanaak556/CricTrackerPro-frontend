@@ -7,7 +7,8 @@ import MatchHeader from "../../components/dashboard/scorer/MatchHeader";
 import ScoreBoard from "../../components/dashboard/scorer/ScoreBoard";
 import BallControls from "../../components/dashboard/scorer/BallControls";
 import PlayerSelectionModal from "../../components/dashboard/scorer/PlayerSelectionModal";
-import StartInningsModal from "../../components/dashboard/scorer/StartInningsModal"; // NEW
+import StartInningsModal from "../../components/dashboard/scorer/StartInningsModal"; 
+import BowlerSelectionModal from "../../components/dashboard/scorer/BowlerSelectionModal";
 
 export default function ScoringPage() {
     const { matchId } = useParams();
@@ -16,13 +17,17 @@ export default function ScoringPage() {
     const [loading, setLoading] = useState(true);
     const [match, setMatch] = useState(null);
     const [players, setPlayers] = useState([]);
+    const [battingPlayers, setBattingPlayers] = useState([]);
+    const [fieldingPlayers, setFieldingPlayers] = useState([]);
+    const [battingTeamId, setBattingTeamId] = useState(null);
+    const [bowlingTeamId, setBowlingTeamId] = useState(null);
     const [innings, setInnings] = useState(null);
     const [inningsStarted, setInningsStarted] = useState(false);
     const [overStarted, setOverStarted] = useState(false);
     const [showInningsModal, setShowInningsModal] = useState(false);
     const [showWicketModal, setShowWicketModal] = useState(false);
     const [showBowlerModal, setShowBowlerModal] = useState(false);
-    const [wicketContext, setWicketContext] = useState(null); // ADD THIS
+    const [wicketContext, setWicketContext] = useState(null); 
 
     /* ======================================================
        INITIAL LOAD
@@ -38,13 +43,38 @@ export default function ScoringPage() {
                 console.log("Type:", typeof playersData);
 
                 setMatch(matchData);
-                setPlayers(Array.isArray(playersData) ? playersData : []);
+                // Combine players from both teams into a flat array
+                const allPlayers = [
+                    ...playersData.teamA.players,
+                    ...playersData.teamB.players
+                ];
+                setPlayers(allPlayers);
+
+                // Determine batting and fielding teams
+                const battingTeamId = matchData.tossWinner && matchData.electedTo === 'bat'
+                    ? matchData.tossWinner._id || matchData.tossWinner
+                    : (matchData.teamA._id === (matchData.tossWinner?._id || matchData.tossWinner) ? matchData.teamB._id : matchData.teamA._id);
+
+                const fieldingTeamId = battingTeamId === matchData.teamA._id ? matchData.teamB._id : matchData.teamA._id;
+
+                // Filter players by team
+                const battingPlayers = allPlayers.filter(player => player.teamId === battingTeamId);
+                const fieldingPlayers = allPlayers.filter(player => player.teamId === fieldingTeamId);
+
+                // Store filtered players (we'll add state for this)
+                setBattingPlayers(battingPlayers);
+                setFieldingPlayers(fieldingPlayers);
+                setBattingTeamId(battingTeamId);
+                setBowlingTeamId(fieldingTeamId);
                 
-                // Check if innings already started
-                if (matchData.currentInnings) {
+                // Check if innings already started and not completed (and has striker set)
+                console.log("currentInnings:", matchData.currentInnings);
+                console.log("completed:", matchData.currentInnings?.completed);
+                console.log("striker:", matchData.currentInnings?.striker);
+                if (matchData.currentInnings && !matchData.currentInnings.completed && matchData.currentInnings.striker) {
                     setInnings(matchData.currentInnings);
                     setInningsStarted(true);
-                    setOverStarted(matchData.currentInnings.isOverActive || false);
+                    setOverStarted(!!matchData.currentInnings.currentOverId);
                 }
                 
                 setLoading(false);
@@ -98,14 +128,23 @@ export default function ScoringPage() {
         try {
             await api.post("/scorer/start-innings", {
                 matchId,
+                battingTeam: battingTeamId,
+                bowlingTeam: bowlingTeamId,
                 striker,
                 nonStriker,
                 bowler: null,
             });
 
+            // Refetch match data to get updated currentInnings
+            const updatedMatch = await api.get(`/matches/${matchId}?t=${Date.now()}`);
+            setMatch(updatedMatch);
+            if (updatedMatch.currentInnings) {
+                setInnings(updatedMatch.currentInnings);
+            }
+
             setInningsStarted(true);
             setShowInningsModal(false);
-            
+
             // Show bowler modal to start first over
             setShowBowlerModal(true);
         } catch (err) {
@@ -118,10 +157,9 @@ export default function ScoringPage() {
     ====================================================== */
     const handleStartOver = async (bowlerId) => {
         try {
-            await api.post("/over/start", {
+            await api.post("/overs/start", {
                 inningsId: innings?._id,
                 bowler: bowlerId,
-                overNumber: innings ? parseInt(innings.totalOvers) + 1 : 1,
             });
 
             setOverStarted(true);
@@ -138,11 +176,29 @@ export default function ScoringPage() {
         if (!overStarted) return;
 
         try {
-            await api.post("/scorer/ball", {
+            const payload = {
                 matchId,
                 inningsId: innings?._id,
-                ...ballData,
-            });
+                overId: innings?.currentOverId,
+                striker: innings?.striker,
+                nonStriker: innings?.nonStriker,
+                bowler: innings?.currentBowler,
+                runs: 0,
+                extraType: "none",
+                isWicket: false,
+                wicketType: null,
+            };
+
+            if (ballData.type === "RUN") {
+                payload.runs = ballData.runs;
+            } else if (ballData.type === "EXTRA") {
+                payload.extraType = ballData.extraType;
+            } else if (ballData.type === "WICKET") {
+                payload.isWicket = true;
+                payload.wicketType = ballData.wicketType;
+            }
+
+            await api.post("/scorer/ball", payload);
         } catch (err) {
             console.error("❌ Ball submit failed", err);
         }
@@ -207,7 +263,7 @@ export default function ScoringPage() {
             {/* START INNINGS MODAL - use the new modal */}
             {showInningsModal && (
                 <StartInningsModal
-                    players={players}
+                    players={battingPlayers}
                     onConfirm={startInnings}
                     onClose={() => setShowInningsModal(false)}
                 />
@@ -216,7 +272,7 @@ export default function ScoringPage() {
             {/* NEW BATTER MODAL - only for wickets */}
             {showWicketModal && (
                 <PlayerSelectionModal
-                    players={players}
+                    players={battingPlayers}
                     striker={innings?.striker}
                     nonStriker={innings?.nonStriker}
                     onConfirm={confirmNewBatter}
@@ -227,36 +283,13 @@ export default function ScoringPage() {
                 />
             )}
 
-            {/* BOWLER MODAL - you need to create this component */}
+            {/* BOWLER MODAL */}
             {showBowlerModal && (
-                <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center items-center px-2">
-                    <div className="bg-white dark:bg-gray-900 rounded w-full max-w-md p-5 space-y-4">
-                        <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-                            Select Bowler for Next Over
-                        </h2>
-                        
-                        <div className="space-y-3">
-                            {players.filter(p => p.role === 'bowler' || p.role === 'all-rounder').map((player) => (
-                                <button
-                                    key={player._id}
-                                    onClick={() => handleStartOver(player._id)}
-                                    className="w-full text-left p-3 border rounded hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                                >
-                                    {player.name}
-                                </button>
-                            ))}
-                        </div>
-                        
-                        <div className="flex justify-end pt-2">
-                            <button
-                                onClick={() => setShowBowlerModal(false)}
-                                className="px-4 py-2 rounded text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800"
-                            >
-                                Cancel
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                <BowlerSelectionModal
+                    bowlers={fieldingPlayers.filter(p => p.role.toLowerCase() === 'bowler' || p.role.toLowerCase() === 'all-rounder')}
+                    onConfirm={handleStartOver}
+                    onClose={() => setShowBowlerModal(false)}
+                />
             )}
         </div>
     );
