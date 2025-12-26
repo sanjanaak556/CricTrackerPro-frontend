@@ -103,6 +103,7 @@ export default function ScoringPage() {
                 totalOvers: data.overs,
                 striker: data.striker,
                 nonStriker: data.nonStriker,
+                currentBowler: data.currentBowler,
             }));
         });
 
