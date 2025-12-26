@@ -41,10 +41,9 @@ import LiveMatch from "./pages/Viewer/LiveMatch";
 // Scorer
 import ScorerDashboard from "./pages/Scorer/ScorerDashboard";
 import ManageScorerMatches from "./pages/Scorer/ManageScorerMatches";
-import StartScoring from "./pages/Scorer/StartScoring";
-import ScoreMatch from "./pages/Scorer/ScoreMatch";
 import Scoreboard from "./pages/Scorer/Scoreboard";
 import ScorerMatchHistory from "./pages/Scorer/MatchHistory";
+import ScoringPage from "./pages/Scorer/ScoringPage";
 
 
 function App() {
@@ -220,24 +219,13 @@ function App() {
           </ProtectedRoute>
         }
       />
-      {/* Start scoring flow (toss -> innings -> start) */}
-      <Route
-        path="/scorer/start/:matchId"
-        element={
-          <ProtectedRoute role="scorer">
-            <DashboardLayout>
-              <StartScoring />
-            </DashboardLayout>
-          </ProtectedRoute>
-        }
-      />
-      {/* Scoring panel */}
+      {/* Start scoring */}
       <Route
         path="/scorer/score/:matchId"
         element={
           <ProtectedRoute role="scorer">
             <DashboardLayout>
-              <ScoreMatch />
+              <ScoringPage />
             </DashboardLayout>
           </ProtectedRoute>
         }
