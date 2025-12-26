@@ -257,7 +257,7 @@ export default function ScoringPage() {
             {/* BALL CONTROLS */}
             <BallControls
                 onSubmitBall={submitBall}
-                disabled={!overStarted}
+                disabled={!overStarted || showWicketModal}
             />
 
             {/* START INNINGS MODAL - use the new modal */}
