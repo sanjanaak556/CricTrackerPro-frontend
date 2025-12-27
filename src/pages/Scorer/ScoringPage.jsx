@@ -212,7 +212,7 @@ export default function ScoringPage() {
                 overId: innings?.currentOverId,
                 striker: innings?.striker,
                 nonStriker: innings?.nonStriker,
-                bowler: innings?.currentBowler,
+                // bowler will be fetched from over on server side
                 runs: 0,
                 extraType: "none",
                 isWicket: false,
