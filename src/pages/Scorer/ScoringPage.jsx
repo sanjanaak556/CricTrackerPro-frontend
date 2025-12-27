@@ -50,12 +50,22 @@ export default function ScoringPage() {
                 ];
                 setPlayers(allPlayers);
 
-                // Determine batting and fielding teams
-                const battingTeamId = matchData.tossWinner && matchData.electedTo === 'bat'
-                    ? matchData.tossWinner._id || matchData.tossWinner
-                    : (matchData.teamA._id === (matchData.tossWinner?._id || matchData.tossWinner) ? matchData.teamB._id : matchData.teamA._id);
+                // Determine batting and fielding teams based on innings
+                let battingTeamId, fieldingTeamId;
 
-                const fieldingTeamId = battingTeamId === matchData.teamA._id ? matchData.teamB._id : matchData.teamA._id;
+                if (matchData.currentInnings && matchData.currentInnings.completed) {
+                    // Second innings: swap teams from first innings
+                    const firstInningsBattingTeam = matchData.currentInnings.battingTeam;
+                    battingTeamId = firstInningsBattingTeam === matchData.teamA._id ? matchData.teamB._id : matchData.teamA._id;
+                    fieldingTeamId = firstInningsBattingTeam;
+                } else {
+                    // First innings: use toss winner logic
+                    battingTeamId = matchData.tossWinner && matchData.electedTo === 'bat'
+                        ? matchData.tossWinner._id || matchData.tossWinner
+                        : (matchData.teamA._id === (matchData.tossWinner?._id || matchData.tossWinner) ? matchData.teamB._id : matchData.teamA._id);
+
+                    fieldingTeamId = battingTeamId === matchData.teamA._id ? matchData.teamB._id : matchData.teamA._id;
+                }
 
                 // Filter players by team
                 const battingPlayers = allPlayers.filter(player => player.teamId === battingTeamId);
@@ -88,6 +98,24 @@ export default function ScoringPage() {
     }, [matchId, navigate]);
 
     /* ======================================================
+       UPDATE BATTING/FIELDING PLAYERS WHEN INNINGS CHANGES
+    ====================================================== */
+    useEffect(() => {
+        if (!innings || !match || !players.length) return;
+
+        const battingTeamId = innings.battingTeam;
+        const bowlingTeamId = innings.bowlingTeam;
+
+        const battingPlayers = players.filter(player => player.teamId === battingTeamId);
+        const fieldingPlayers = players.filter(player => player.teamId === bowlingTeamId);
+
+        setBattingPlayers(battingPlayers);
+        setFieldingPlayers(fieldingPlayers);
+        setBattingTeamId(battingTeamId);
+        setBowlingTeamId(bowlingTeamId);
+    }, [innings, match, players]);
+
+    /* ======================================================
        SOCKETS
     ====================================================== */
     useEffect(() => {
@@ -104,6 +132,7 @@ export default function ScoringPage() {
                 striker: data.striker,
                 nonStriker: data.nonStriker,
                 currentBowler: data.currentBowler,
+                fallOfWickets: data.fallOfWickets || [],
             }));
         });
 
@@ -206,6 +235,13 @@ export default function ScoringPage() {
     };
 
     /* ======================================================
+       HANDLE WICKET SELECT
+    ====================================================== */
+    const handleWicketSelect = (wicketType) => {
+        submitBall({ type: "WICKET", wicketType });
+    };
+
+    /* ======================================================
        CONFIRM NEW BATTER
     ====================================================== */
     const confirmNewBatter = async ({ newBatter, wicketType }) => {
@@ -258,6 +294,7 @@ export default function ScoringPage() {
             {/* BALL CONTROLS */}
             <BallControls
                 onSubmitBall={submitBall}
+                onWicketSelect={handleWicketSelect}
                 disabled={!overStarted || showWicketModal}
             />
 
@@ -274,6 +311,7 @@ export default function ScoringPage() {
             {showWicketModal && (
                 <PlayerSelectionModal
                     players={battingPlayers}
+                    fieldingPlayers={fieldingPlayers}
                     striker={innings?.striker}
                     nonStriker={innings?.nonStriker}
                     onConfirm={confirmNewBatter}

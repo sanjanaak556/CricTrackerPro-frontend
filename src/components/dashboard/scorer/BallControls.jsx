@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-export default function BallControls({ onSubmitBall, disabled = false }) {
+export default function BallControls({ onSubmitBall, onWicketSelect, disabled = false }) {
   const [showExtras, setShowExtras] = useState(false);
   const [showWicketTypes, setShowWicketTypes] = useState(false);
 
@@ -131,7 +131,7 @@ export default function BallControls({ onSubmitBall, disabled = false }) {
           ].map((type) => (
             <button
               key={type}
-              onClick={() => submitWicket(type)}
+              onClick={() => onWicketSelect(type)}
               className={`${baseBtn} bg-red-500 hover:bg-red-600 text-white capitalize`}
             >
               {type}

@@ -11,6 +11,7 @@ const WICKET_TYPES = [
 
 export default function PlayerSelectionModal({
   players = [],
+  fieldingPlayers = [],
   striker,
   nonStriker,
   onClose,
@@ -18,6 +19,8 @@ export default function PlayerSelectionModal({
 }) {
   const [wicketType, setWicketType] = useState("");
   const [newBatter, setNewBatter] = useState("");
+  const [fielder, setFielder] = useState("");
+  const [whoIsOut, setWhoIsOut] = useState("");
   const [availableBatters, setAvailableBatters] = useState([]);
 
   // Safely calculate available batters
@@ -46,6 +49,7 @@ export default function PlayerSelectionModal({
   }, [players, striker, nonStriker]);
 
   const isRunOut = wicketType === "Run Out";
+  const requiresFielder = ["Caught", "Stumped", "Run Out"].includes(wicketType);
 
   return (
     <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center items-center px-2">
@@ -94,6 +98,41 @@ export default function PlayerSelectionModal({
           )}
         </select>
 
+        {/* FIELDER - only for caught, stumped, runout */}
+        {requiresFielder && (
+          <select
+            className="w-full border rounded p-2 bg-white dark:bg-gray-800 dark:border-gray-700 text-gray-900 dark:text-white"
+            value={fielder}
+            onChange={(e) => setFielder(e.target.value)}
+          >
+            <option value="">Select Fielder</option>
+            {fieldingPlayers.length > 0 ? (
+              fieldingPlayers.map((player) => (
+                <option key={player._id} value={player._id}>
+                  {player.name || `Player ${player._id}`}
+                </option>
+              ))
+            ) : (
+              <option value="" disabled>
+                No fielding players available
+              </option>
+            )}
+          </select>
+        )}
+
+        {/* WHO IS OUT - only for runout */}
+        {isRunOut && (
+          <select
+            className="w-full border rounded p-2 bg-white dark:bg-gray-800 dark:border-gray-700 text-gray-900 dark:text-white"
+            value={whoIsOut}
+            onChange={(e) => setWhoIsOut(e.target.value)}
+          >
+            <option value="">Who is out?</option>
+            <option value="striker">Striker</option>
+            <option value="nonStriker">Non-Striker</option>
+          </select>
+        )}
+
         {/* ACTIONS */}
         <div className="flex justify-end gap-3 pt-2">
           <button
@@ -104,11 +143,13 @@ export default function PlayerSelectionModal({
           </button>
 
           <button
-            disabled={!wicketType || (!isRunOut && !newBatter)}
+            disabled={!wicketType || (!isRunOut && !newBatter) || (requiresFielder && !fielder) || (isRunOut && !whoIsOut)}
             onClick={() =>
               onConfirm({
                 wicketType,
                 newBatter: newBatter || null,
+                fielder: fielder || null,
+                whoIsOut: whoIsOut || null,
               })
             }
             className="px-4 py-2 rounded bg-red-600 text-white disabled:opacity-50"

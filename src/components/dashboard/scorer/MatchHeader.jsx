@@ -47,6 +47,22 @@ export default function MatchHeader({ match }) {
         </div>
       </div>
 
+      {/* TOSS INFO */}
+      {match.tossWinner && match.electedTo && (
+        <div className="text-center text-sm text-gray-600 dark:text-gray-400">
+          Toss won by{" "}
+          <span className="font-semibold text-gray-900 dark:text-white">
+            {match.tossWinner._id === match.teamA._id
+              ? match.teamA.name
+              : match.teamB.name}
+          </span>{" "}
+          and elected to{" "}
+          <span className="font-semibold text-gray-900 dark:text-white">
+            {match.electedTo.charAt(0).toUpperCase() + match.electedTo.slice(1)}
+          </span>
+        </div>
+      )}
+
       {/* MATCH META */}
       <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
         <div className="flex gap-2">

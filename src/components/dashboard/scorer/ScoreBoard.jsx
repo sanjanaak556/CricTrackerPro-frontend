@@ -61,6 +61,24 @@ export default function ScoreBoard({ innings }) {
           {currentBowler?.name || "Not selected"}
         </div>
       </div>
+
+      {/* FALL OF WICKETS */}
+      {innings.fallOfWickets && innings.fallOfWickets.length > 0 && (
+        <div className="bg-white dark:bg-gray-800 rounded p-3 text-sm">
+          <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+            Fall of Wickets
+          </div>
+          <div className="space-y-1">
+            {innings.fallOfWickets.map((wicket, index) => (
+              <div key={index} className="text-xs text-gray-700 dark:text-gray-300">
+                {wicket.playerId?.name || "Unknown"} - {wicket.scoreAtFall} ({wicket.overAtFall})
+                {wicket.bowlerId && ` b ${wicket.bowlerId.name}`}
+                {wicket.fielderId && ` c ${wicket.fielderId.name}`}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
