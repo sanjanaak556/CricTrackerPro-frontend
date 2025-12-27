@@ -7,8 +7,9 @@ import MatchHeader from "../../components/dashboard/scorer/MatchHeader";
 import ScoreBoard from "../../components/dashboard/scorer/ScoreBoard";
 import BallControls from "../../components/dashboard/scorer/BallControls";
 import PlayerSelectionModal from "../../components/dashboard/scorer/PlayerSelectionModal";
-import StartInningsModal from "../../components/dashboard/scorer/StartInningsModal"; 
+import StartInningsModal from "../../components/dashboard/scorer/StartInningsModal";
 import BowlerSelectionModal from "../../components/dashboard/scorer/BowlerSelectionModal";
+import EndMatchModal from "../../components/dashboard/scorer/EndMatchModal";
 
 export default function ScoringPage() {
     const { matchId } = useParams();
@@ -27,7 +28,8 @@ export default function ScoringPage() {
     const [showInningsModal, setShowInningsModal] = useState(false);
     const [showWicketModal, setShowWicketModal] = useState(false);
     const [showBowlerModal, setShowBowlerModal] = useState(false);
-    const [wicketContext, setWicketContext] = useState(null); 
+    const [showEndMatchModal, setShowEndMatchModal] = useState(false);
+    const [wicketContext, setWicketContext] = useState(null);
 
     /* ======================================================
        INITIAL LOAD
@@ -276,6 +278,14 @@ export default function ScoringPage() {
         }
     };
 
+    /* ======================================================
+       HANDLE MATCH END
+    ====================================================== */
+    const handleMatchEnd = (status) => {
+        // Navigate back to scorer dashboard or match history
+        navigate("/scorer/dashboard");
+    };
+
     if (loading) {
         return <div className="p-6 text-gray-400">Loading scoring data...</div>;
     }
@@ -325,6 +335,14 @@ export default function ScoringPage() {
                 </button>
             )}
 
+            {/* END MATCH BUTTON - always visible */}
+            <button
+                onClick={() => setShowEndMatchModal(true)}
+                className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-colors mt-4 mx-2 sm:mx-4 md:mx-6"
+            >
+                🏁 End Match
+            </button>
+
             {/* START INNINGS MODAL - use the new modal */}
             {showInningsModal && (
                 <StartInningsModal
@@ -355,6 +373,15 @@ export default function ScoringPage() {
                     bowlers={fieldingPlayers.filter(p => p.role.toLowerCase() === 'bowler' || p.role.toLowerCase() === 'all-rounder')}
                     onConfirm={handleStartOver}
                     onClose={() => setShowBowlerModal(false)}
+                />
+            )}
+
+            {/* END MATCH MODAL */}
+            {showEndMatchModal && (
+                <EndMatchModal
+                    matchId={matchId}
+                    onClose={() => setShowEndMatchModal(false)}
+                    onMatchEnd={handleMatchEnd}
                 />
             )}
         </div>

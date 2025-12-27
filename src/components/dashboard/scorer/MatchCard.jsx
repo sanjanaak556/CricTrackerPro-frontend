@@ -167,6 +167,15 @@ export default function MatchCard({ match, onMatchUpdate }) {
           </div>
         )}
 
+        {/* Show winner info if match is completed */}
+        {match.status === "completed" && match.winnerTeam && (
+          <div className="mt-3 p-2 bg-green-50 dark:bg-green-900 rounded">
+            <div className="text-xs font-medium text-green-700 dark:text-green-200">
+              Winner: {match.winnerTeam.name} {match.winType === "runs" ? `by ${match.winMargin} run${match.winMargin !== 1 ? 's' : ''}` : match.winType === "wickets" ? `by ${match.winMargin} wicket${match.winMargin !== 1 ? 's' : ''}` : ""}
+            </div>
+          </div>
+        )}
+
         {/* ---------- ACTION BUTTON ---------- */}
         <button
           onClick={handleAction}
