@@ -259,6 +259,23 @@ export default function ScoringPage() {
         }
     };
 
+    /* ======================================================
+       UNDO LAST BALL
+    ====================================================== */
+    const undoLastBall = async () => {
+        try {
+            await api.post(`/scorer/undo/${matchId}`);
+            // Refetch match data to update the UI
+            const updatedMatch = await api.get(`/matches/${matchId}?t=${Date.now()}`);
+            setMatch(updatedMatch);
+            if (updatedMatch.currentInnings) {
+                setInnings(updatedMatch.currentInnings);
+            }
+        } catch (err) {
+            console.error("❌ Failed to undo last ball", err);
+        }
+    };
+
     if (loading) {
         return <div className="p-6 text-gray-400">Loading scoring data...</div>;
     }
@@ -297,6 +314,16 @@ export default function ScoringPage() {
                 onWicketSelect={handleWicketSelect}
                 disabled={!overStarted || showWicketModal}
             />
+
+            {/* UNDO LAST BALL BUTTON */}
+            {inningsStarted && (
+                <button
+                    onClick={undoLastBall}
+                    className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+                >
+                    ↶ Undo Last Ball
+                </button>
+            )}
 
             {/* START INNINGS MODAL - use the new modal */}
             {showInningsModal && (
