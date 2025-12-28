@@ -132,12 +132,18 @@ export default function ScoringPage() {
 
         socket.emit("joinMatch", matchId);
 
+        socket.on("inningsStarted", (data) => {
+            setInnings(data.innings);
+        });
+
         socket.on("liveScoreUpdate", (data) => {
             setInnings((prev) => ({
                 ...prev,
                 totalRuns: data.runs,
                 totalWickets: data.wickets,
                 totalOvers: data.overs,
+                battingTeam: data.battingTeam,
+                bowlingTeam: data.bowlingTeam,
                 striker: data.striker,
                 nonStriker: data.nonStriker,
                 currentBowler: data.currentBowler,
@@ -299,11 +305,26 @@ export default function ScoringPage() {
 
     return (
         <div className="p-4 space-y-4 max-w-5xl mx-auto">
-            {/* MATCH HEADER */}
-            <MatchHeader match={match} />
+        {/* MATCH HEADER */}
+        <MatchHeader match={match} />
 
-            {/* SCOREBOARD */}
-            <ScoreBoard innings={innings} />
+        {/* BATTING TEAM INDICATOR */}
+        {innings && (
+            <div className="flex items-center justify-center">
+                <div className="bg-gradient-to-r from-green-600 to-blue-600 text-white px-6 py-3 rounded-lg shadow-md text-center border border-green-400 animate-pulse">
+                    <div className="flex items-center gap-2 text-sm font-semibold">
+                        <span className="text-lg animate-bounce">🏏</span>
+                        <span>Now Batting</span>
+                    </div>
+                    <div className="text-lg font-bold mt-1">
+                        {innings.battingTeam?.name || (innings.battingTeam === match?.teamA?._id ? match.teamA.name : match?.teamB?.name)}
+                    </div>
+                </div>
+            </div>
+        )}
+
+        {/* SCOREBOARD */}
+        <ScoreBoard innings={innings} />
 
             {/* START INNINGS BUTTON - only show if innings hasn't started */}
             {!inningsStarted && (

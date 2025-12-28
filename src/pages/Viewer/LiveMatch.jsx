@@ -91,6 +91,12 @@ const LiveMatch = () => {
     // Join match room for live updates
     socket.emit("joinMatch", matchId);
 
+    // Listen for innings started events
+    socket.on("inningsStarted", (data) => {
+      console.log("🏏 Innings started event received:", data);
+      setActiveInnings(data.innings);
+    });
+
     // Listen for live score updates
     socket.on("liveScoreUpdate", (data) => {
       setMatch((prev) => ({
@@ -107,6 +113,8 @@ const LiveMatch = () => {
         totalRuns: data.runs,
         totalWickets: data.wickets,
         totalOvers: data.overs,
+        battingTeam: data.battingTeam,
+        bowlingTeam: data.bowlingTeam,
         striker: data.striker,
         nonStriker: data.nonStriker,
         currentBowler: data.currentBowler,
@@ -393,7 +401,9 @@ const LiveMatch = () => {
                 <span className="text-lg animate-bounce">🏏</span>
                 <span>Now Batting</span>
               </div>
-              <div className="text-lg font-bold mt-1">{activeInnings.battingTeam?.name}</div>
+              <div className="text-lg font-bold mt-1">
+                {activeInnings.battingTeam?.name || (activeInnings.battingTeam === match?.teamA?._id ? match.teamA.name : match?.teamB?.name)}
+              </div>
             </div>
           </div>
         )}
