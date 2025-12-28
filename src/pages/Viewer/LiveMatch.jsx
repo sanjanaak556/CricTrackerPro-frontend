@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import api from "../../services/api";
+import { socket, getConnectionStatus, addConnectionListener } from "../../utils/socket";
 import { RefreshCw, Swords, User, Target, ArrowLeft } from "lucide-react";
 import MatchEventAnimation from "../../components/dashboard/viewer/MatchEventAnimation";
 
@@ -46,6 +47,12 @@ const LiveMatch = () => {
   const [matchEvent, setMatchEvent] = useState(null);
   const [lastBallId, setLastBallId] = useState(null); // 🔧 FIX: prevent repeat animation
 
+  // 🔗 Socket connection status
+  const [isSocketConnected, setIsSocketConnected] = useState(getConnectionStatus());
+  const [pollingInterval, setPollingInterval] = useState(null);
+
+  let cleanupConnectionListener;
+
   /* -------------------- fetch -------------------- */
   const fetchLiveData = async () => {
     try {
@@ -65,7 +72,7 @@ const LiveMatch = () => {
         setActiveOver(overRes || null);
 
         const oversRes = await api.get(`/overs/innings/${current._id}`);
-        setOvers(oversRes || []);
+        setOvers(oversRes.overs || []);
 
         const commRes = await api.get(`/commentary/innings/${current._id}`);
         setCommentary(commRes.commentary || []);
@@ -80,8 +87,140 @@ const LiveMatch = () => {
 
   useEffect(() => {
     fetchLiveData();
-    const interval = setInterval(fetchLiveData, 6000);
-    return () => clearInterval(interval);
+
+    // Join match room for live updates
+    socket.emit("joinMatch", matchId);
+
+    // Listen for live score updates
+    socket.on("liveScoreUpdate", (data) => {
+      setMatch((prev) => ({
+        ...prev,
+        currentScore: {
+          runs: data.runs,
+          wickets: data.wickets,
+          overs: data.overs
+        }
+      }));
+
+      setActiveInnings((prev) => ({
+        ...prev,
+        totalRuns: data.runs,
+        totalWickets: data.wickets,
+        totalOvers: data.overs,
+        striker: data.striker,
+        nonStriker: data.nonStriker,
+        currentBowler: data.currentBowler,
+        fallOfWickets: data.fallOfWickets || []
+      }));
+    });
+
+    // Listen for ball added events
+    socket.on("ballAdded", (data) => {
+      const { ball, overId, overNumber, bowler } = data;
+
+      // Update active over if it's the current one
+      setActiveOver((prev) => {
+        if (prev && prev._id === overId) {
+          return {
+            ...prev,
+            balls: [...(prev.balls || []), ball],
+            bowler: bowler
+          };
+        }
+        return prev;
+      });
+
+      // Update overs list
+      setOvers((prev) => {
+        const existingOverIndex = prev.findIndex(o => o._id === overId);
+        if (existingOverIndex >= 0) {
+          const updatedOvers = [...prev];
+          updatedOvers[existingOverIndex] = {
+            ...updatedOvers[existingOverIndex],
+            balls: [...(updatedOvers[existingOverIndex].balls || []), ball]
+          };
+          return updatedOvers;
+        } else {
+          // New over
+          return [...prev, {
+            _id: overId,
+            overNumber,
+            bowler,
+            balls: [ball]
+          }];
+        }
+      });
+
+      // Trigger match event animation for special balls
+      if (ball.isWicket) {
+        setMatchEvent("WICKET");
+        setTimeout(() => setMatchEvent(null), 1800);
+      } else if (ball.runs === 6) {
+        setMatchEvent("SIX");
+        setTimeout(() => setMatchEvent(null), 1800);
+      } else if (ball.runs === 4) {
+        setMatchEvent("FOUR");
+        setTimeout(() => setMatchEvent(null), 1800);
+      }
+    });
+
+    // Listen for ball removed events (for undo)
+    socket.on("ballRemoved", (data) => {
+      const { overId } = data;
+
+      // Update active over
+      setActiveOver((prev) => {
+        if (prev && prev._id === overId) {
+          const balls = prev.balls || [];
+          return {
+            ...prev,
+            balls: balls.slice(0, -1) // Remove last ball
+          };
+        }
+        return prev;
+      });
+
+      // Update overs list
+      setOvers((prev) => {
+        return prev.map(over => {
+          if (over._id === overId) {
+            const balls = over.balls || [];
+            return {
+              ...over,
+              balls: balls.slice(0, -1) // Remove last ball
+            };
+          }
+          return over;
+        });
+      });
+    });
+
+    // Listen for new commentary
+    socket.on("newCommentary", (data) => {
+      setCommentary((prev) => [data, ...prev]);
+    });
+
+    // Listen for over complete
+    socket.on("overComplete", (data) => {
+      // Reset active over when over is completed
+      setActiveOver(null);
+    });
+
+    // Cleanup on unmount
+    return () => {
+      socket.emit("leaveMatch", matchId);
+      socket.off("liveScoreUpdate");
+      socket.off("ballAdded");
+      socket.off("ballRemoved");
+      socket.off("newCommentary");
+      socket.off("overComplete");
+
+      // Cleanup connection listener and polling
+      cleanupConnectionListener();
+      if (pollingInterval) {
+        clearInterval(pollingInterval);
+      }
+    };
   }, [matchId]);
 
   /*  MATCH EVENT DETECTION (4 / 6 / WICKET) */
@@ -103,6 +242,41 @@ const LiveMatch = () => {
       setTimeout(() => setMatchEvent(null), 1800);
     }
   }, [activeOver]); // 👈 correct dependency
+
+  /* 🔗 CONNECTION MONITORING & FALLBACK POLLING */
+  useEffect(() => {
+    // Set up connection listener
+    cleanupConnectionListener = addConnectionListener((connected) => {
+      setIsSocketConnected(connected);
+
+      if (connected) {
+        // Stop polling when connected
+        if (pollingInterval) {
+          clearInterval(pollingInterval);
+          setPollingInterval(null);
+        }
+      } else {
+        // Start polling when disconnected
+        if (!pollingInterval) {
+          const interval = setInterval(fetchLiveData, 5000); // Poll every 5 seconds
+          setPollingInterval(interval);
+        }
+      }
+    });
+
+    // Initial check
+    setIsSocketConnected(getConnectionStatus());
+
+    // Cleanup on unmount
+    return () => {
+      if (cleanupConnectionListener) {
+        cleanupConnectionListener();
+      }
+      if (pollingInterval) {
+        clearInterval(pollingInterval);
+      }
+    };
+  }, []); // Empty dependency array since we only want this to run once
 
   if (loading)
     return (
@@ -149,10 +323,20 @@ const LiveMatch = () => {
             <h2 className="text-xl font-bold">{match.teamA?.name}</h2>
           </div>
 
-          <span className="relative px-3 py-1 text-xs font-bold text-red-600 border border-red-500 rounded-full bg-red-500/20">
-            <span className="absolute left-2 h-2 w-2 bg-red-600 rounded-full animate-ping"></span>
-            <span className="absolute left-2 h-2 w-2 bg-red-600 rounded-full"></span>
-            <span className="ml-4">LIVE</span>
+          <span className={`relative px-3 py-1 text-xs font-bold border rounded-full ${
+            isSocketConnected
+              ? 'text-green-600 border-green-500 bg-green-500/20'
+              : 'text-orange-600 border-orange-500 bg-orange-500/20'
+          }`}>
+            <span className={`absolute left-2 h-2 w-2 rounded-full ${
+              isSocketConnected ? 'bg-green-600 animate-ping' : 'bg-orange-600'
+            }`}></span>
+            <span className={`absolute left-2 h-2 w-2 rounded-full ${
+              isSocketConnected ? 'bg-green-600' : 'bg-orange-600'
+            }`}></span>
+            <span className="ml-4">
+              {isSocketConnected ? 'LIVE' : 'POLLING'}
+            </span>
           </span>
 
           <div className="flex items-center gap-4">
