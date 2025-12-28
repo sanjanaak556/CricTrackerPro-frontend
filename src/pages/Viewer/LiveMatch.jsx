@@ -110,7 +110,14 @@ const LiveMatch = () => {
         striker: data.striker,
         nonStriker: data.nonStriker,
         currentBowler: data.currentBowler,
-        fallOfWickets: data.fallOfWickets || []
+        fallOfWickets: data.fallOfWickets || [],
+        strikerRuns: data.strikerRuns ?? 0,
+        strikerBalls: data.strikerBalls ?? 0,
+        nonStrikerRuns: data.nonStrikerRuns ?? 0,
+        nonStrikerBalls: data.nonStrikerBalls ?? 0,
+        bowlerOvers: data.bowlerOvers ?? "0.0",
+        bowlerRuns: data.bowlerRuns ?? 0,
+        bowlerWickets: data.bowlerWickets ?? 0
       }));
     });
 
