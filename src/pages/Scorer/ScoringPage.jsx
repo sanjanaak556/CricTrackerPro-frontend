@@ -62,11 +62,18 @@ export default function ScoringPage() {
                     fieldingTeamId = firstInningsBattingTeam;
                 } else {
                     // First innings: use toss winner logic
-                    battingTeamId = matchData.tossWinner && matchData.electedTo === 'bat'
-                        ? matchData.tossWinner._id || matchData.tossWinner
-                        : (matchData.teamA._id === (matchData.tossWinner?._id || matchData.tossWinner) ? matchData.teamB._id : matchData.teamA._id);
-
-                    fieldingTeamId = battingTeamId === matchData.teamA._id ? matchData.teamB._id : matchData.teamA._id;
+                    const tossWinnerId = matchData.tossWinner?._id || matchData.tossWinner;
+                    if (matchData.tossWinner && matchData.electedTo === 'bat') {
+                        battingTeamId = tossWinnerId;
+                        fieldingTeamId = tossWinnerId === matchData.teamA._id ? matchData.teamB._id : matchData.teamA._id;
+                    } else if (matchData.tossWinner && matchData.electedTo === 'bowl') {
+                        fieldingTeamId = tossWinnerId;
+                        battingTeamId = tossWinnerId === matchData.teamA._id ? matchData.teamB._id : matchData.teamA._id;
+                    } else {
+                        // Default: teamA bats first if no toss info
+                        battingTeamId = matchData.teamA._id;
+                        fieldingTeamId = matchData.teamB._id;
+                    }
                 }
 
                 // Filter players by team

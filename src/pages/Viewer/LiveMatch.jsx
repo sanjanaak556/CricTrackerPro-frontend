@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import api from "../../services/api";
 import { socket, getConnectionStatus, addConnectionListener } from "../../utils/socket";
-import { RefreshCw, Swords, User, Target, ArrowLeft } from "lucide-react";
+import { RefreshCw, Swords, User, Target, ArrowLeft, Zap } from "lucide-react";
 import MatchEventAnimation from "../../components/dashboard/viewer/MatchEventAnimation";
 
 /* -------------------- helpers -------------------- */
@@ -366,7 +366,7 @@ const LiveMatch = () => {
             <b>Venue:</b> {match.venue?.name}
           </p>
           <p>
-            <b>Toss:</b> {match.tossWinner?.name} ({match.tossDecision})
+            <b>Toss:</b> {match.tossWinner?.name} ({match.electedTo})
           </p>
           <p>
             <b>Umpires:</b>{" "}
@@ -384,6 +384,19 @@ const LiveMatch = () => {
               : "—"}
           </p>
         </div>
+
+        {/* BATTING TEAM INDICATOR */}
+        {activeInnings && (
+          <div className="mt-4 flex items-center justify-center">
+            <div className="bg-gradient-to-r from-green-600 to-blue-600 text-white px-6 py-3 rounded-lg shadow-md text-center border border-green-400 animate-pulse">
+              <div className="flex items-center gap-2 text-sm font-semibold">
+                <span className="text-lg animate-bounce">🏏</span>
+                <span>Now Batting</span>
+              </div>
+              <div className="text-lg font-bold mt-1">{activeInnings.battingTeam?.name}</div>
+            </div>
+          </div>
+        )}
 
         {/* SCORE */}
         <div className="mt-4 flex justify-between items-center">
