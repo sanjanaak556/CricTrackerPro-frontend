@@ -200,19 +200,19 @@ export default function ScoringPage() {
     /* ======================================================
        START OVER
     ====================================================== */
-    const handleStartOver = async (bowlerId) => {
-        try {
-            await api.post("/overs/start", {
-                inningsId: innings?._id,
-                bowler: bowlerId,
-            });
+   const handleStartOver = async (bowlerId) => {
+  try {
+    await api.post(`/scorer/start-over/${matchId}`, {
+      inningsId: innings?._id,
+      bowler: bowlerId,
+    });
 
-            setOverStarted(true);
-            setShowBowlerModal(false);
-        } catch (err) {
-            console.error("❌ Failed to start over", err);
-        }
-    };
+    setOverStarted(true);
+    setShowBowlerModal(false);
+  } catch (err) {
+    console.error("❌ Failed to start over", err);
+  }
+};
 
     /* ======================================================
        SUBMIT BALL
