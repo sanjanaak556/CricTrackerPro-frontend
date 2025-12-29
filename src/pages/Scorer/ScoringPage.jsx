@@ -77,8 +77,8 @@ export default function ScoringPage() {
                 }
 
                 // Filter players by team
-                const battingPlayers = allPlayers.filter(player => player.teamId === battingTeamId);
-                const fieldingPlayers = allPlayers.filter(player => player.teamId === fieldingTeamId);
+                const battingPlayers = allPlayers.filter(player => player.teamId.toString() === battingTeamId.toString());
+                const fieldingPlayers = allPlayers.filter(player => player.teamId.toString() === fieldingTeamId.toString());
 
                 // Store filtered players (we'll add state for this)
                 setBattingPlayers(battingPlayers);
@@ -112,11 +112,11 @@ export default function ScoringPage() {
     useEffect(() => {
         if (!innings || !match || !players.length) return;
 
-        const battingTeamId = innings.battingTeam;
-        const bowlingTeamId = innings.bowlingTeam;
+        const battingTeamId = innings.battingTeam?._id || innings.battingTeam;
+        const bowlingTeamId = innings.bowlingTeam?._id || innings.bowlingTeam;
 
-        const battingPlayers = players.filter(player => player.teamId === battingTeamId);
-        const fieldingPlayers = players.filter(player => player.teamId === bowlingTeamId);
+        const battingPlayers = players.filter(player => player.teamId.toString() === battingTeamId.toString());
+        const fieldingPlayers = players.filter(player => player.teamId.toString() === bowlingTeamId.toString());
 
         setBattingPlayers(battingPlayers);
         setFieldingPlayers(fieldingPlayers);
@@ -232,6 +232,8 @@ export default function ScoringPage() {
                 extraType: "none",
                 isWicket: false,
                 wicketType: null,
+                fielder: null,
+                dismissedBatsman: null,
             };
 
             if (ballData.type === "RUN") {
@@ -241,6 +243,8 @@ export default function ScoringPage() {
             } else if (ballData.type === "WICKET") {
                 payload.isWicket = true;
                 payload.wicketType = ballData.wicketType;
+                payload.fielder = ballData.fielder;
+                payload.dismissedBatsman = ballData.dismissedBatsman;
             }
 
             await api.post("/scorer/ball", payload);

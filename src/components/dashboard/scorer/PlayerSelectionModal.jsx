@@ -31,20 +31,20 @@ export default function PlayerSelectionModal({
     }
 
     // Ensure we have valid IDs for comparison
-    const strikerId = striker?._id || striker;
-    const nonStrikerId = nonStriker?._id || nonStriker;
-    
+    const strikerId = (striker?._id || striker)?.toString();
+    const nonStrikerId = (nonStriker?._id || nonStriker)?.toString();
+
     const filtered = players.filter((player) => {
       // Check if player has an _id property
       if (!player || !player._id) return false;
-      
+
       // Get the player ID
-      const playerId = player._id;
-      
+      const playerId = player._id.toString();
+
       // Exclude current batters
       return playerId !== strikerId && playerId !== nonStrikerId;
     });
-    
+
     setAvailableBatters(filtered);
   }, [players, striker, nonStriker]);
 
@@ -87,7 +87,7 @@ export default function PlayerSelectionModal({
 
           {availableBatters.length > 0 ? (
             availableBatters.map((player) => (
-              <option key={player._id} value={player._id}>
+              <option key={player._id} value={player._id.toString()}>
                 {player.name || `Player ${player._id}`}
               </option>
             ))
@@ -108,7 +108,7 @@ export default function PlayerSelectionModal({
             <option value="">Select Fielder</option>
             {fieldingPlayers.length > 0 ? (
               fieldingPlayers.map((player) => (
-                <option key={player._id} value={player._id}>
+                <option key={player._id} value={player._id.toString()}>
                   {player.name || `Player ${player._id}`}
                 </option>
               ))
