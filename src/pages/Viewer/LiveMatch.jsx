@@ -328,7 +328,7 @@ const LiveMatch = () => {
         <ArrowLeft className="w-5 h-5 mr-1" /> Back to Matches
       </Link>
       {/*  NEW: MATCH EVENT ANIMATION OVERLAY */}
-      {matchEvent && <MatchEventAnimation type={matchEvent} />}
+      {matchEvent && <MatchEventAnimation event={matchEvent} />}
 
       {/* ================= MATCH HEADER ================= */}
       <div className="bg-white dark:bg-gray-900 rounded-2xl p-5 border dark:border-gray-700 shadow">
