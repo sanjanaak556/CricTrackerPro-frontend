@@ -76,9 +76,20 @@ export default function ScoringPage() {
                     }
                 }
 
+                // Ensure batting and bowling teams are different
+                if (battingTeamId.toString() === fieldingTeamId.toString()) {
+                    console.error("Batting and bowling teams are the same, fixing...");
+                    fieldingTeamId = battingTeamId === matchData.teamA._id ? matchData.teamB._id : matchData.teamA._id;
+                }
+
                 // Filter players by team
                 const battingPlayers = allPlayers.filter(player => player.teamId.toString() === battingTeamId.toString());
                 const fieldingPlayers = allPlayers.filter(player => player.teamId.toString() === fieldingTeamId.toString());
+
+                console.log("Batting Team ID:", battingTeamId);
+                console.log("Bowling Team ID:", fieldingTeamId);
+                console.log("Batting Players:", battingPlayers.length);
+                console.log("Fielding Players:", fieldingPlayers.length);
 
                 // Store filtered players (we'll add state for this)
                 setBattingPlayers(battingPlayers);
@@ -200,17 +211,22 @@ export default function ScoringPage() {
     /* ======================================================
        START OVER
     ====================================================== */
-   const handleStartOver = async (bowlerId) => {
+  const handleStartOver = async (bowlerId) => {
+  if (!innings?._id) {
+    console.error("❌ Cannot start over: inningsId missing");
+    return;
+  }
+
   try {
     await api.post(`/scorer/start-over/${matchId}`, {
-      inningsId: innings?._id,
+      inningsId: innings._id,
       bowler: bowlerId,
     });
 
     setOverStarted(true);
     setShowBowlerModal(false);
   } catch (err) {
-    console.error("❌ Failed to start over", err);
+    console.error("❌ Failed to start over", err.response?.data || err);
   }
 };
 
