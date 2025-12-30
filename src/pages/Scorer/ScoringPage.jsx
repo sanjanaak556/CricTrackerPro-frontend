@@ -170,6 +170,7 @@ export default function ScoringPage() {
                 nonStriker: data.nonStriker,
                 currentBowler: data.currentBowler,
                 fallOfWickets: data.fallOfWickets || [],
+                inningsNumber: data.inningsNumber
             }));
         });
 

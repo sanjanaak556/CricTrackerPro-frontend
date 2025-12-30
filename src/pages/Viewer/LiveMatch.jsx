@@ -131,7 +131,8 @@ const LiveMatch = () => {
         nonStrikerBalls: data.nonStrikerBalls ?? 0,
         bowlerOvers: data.bowlerOvers ?? "0.0",
         bowlerRuns: data.bowlerRuns ?? 0,
-        bowlerWickets: data.bowlerWickets ?? 0
+        bowlerWickets: data.bowlerWickets ?? 0,
+        inningsNumber: data.inningsNumber
       }));
     });
 
