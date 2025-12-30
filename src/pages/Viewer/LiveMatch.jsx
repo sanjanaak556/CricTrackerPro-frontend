@@ -663,8 +663,8 @@ const LiveMatch = () => {
           {commentary.length === 0 && (
             <p className="text-sm text-gray-500">No commentary yet</p>
           )}
-          {commentary.map((c) => (
-            <div key={c._id} className={`text-sm ${commentaryColor[c.type]}`}>
+          {commentary.map((c, index) => (
+            <div key={c._id || `commentary-${index}`} className={`text-sm ${commentaryColor[c.type]}`}>
               <span className="text-xs text-gray-400 mr-2">
                 {new Date(c.createdAt).toLocaleTimeString()}
               </span>
