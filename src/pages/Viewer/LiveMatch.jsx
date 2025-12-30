@@ -439,7 +439,7 @@ const LiveMatch = () => {
               Overs: {match.currentScore?.overs} / {match.overs}
             </p>
             <p className="text-sm text-gray-500">CRR: {crr}</p>
-            {rrr && <p className="text-sm text-gray-500">RRR: {rrr}</p>}
+            <p className="text-sm text-gray-500">RRR: {rrr || 'N/A'}</p>
             {match.target && activeInnings?.inningsNumber === 2 && <p className="text-sm text-gray-500">Target: {match.target}</p>}
             {targetDisplay && <p className="text-sm font-semibold text-blue-600">{targetDisplay}</p>}
           </div>

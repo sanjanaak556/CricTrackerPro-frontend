@@ -324,6 +324,31 @@ export default function ScoringPage() {
     };
 
     /* ======================================================
+       END INNINGS
+    ====================================================== */
+    const endInnings = async () => {
+        if (!window.confirm("Are you sure you want to end the current innings?")) {
+            return;
+        }
+
+        try {
+            await api.put(`/matches/${matchId}/end-innings`, {
+                reason: "Manual end by scorer"
+            });
+
+            // Refetch match data to update the UI
+            const updatedMatch = await api.get(`/matches/${matchId}?t=${Date.now()}`);
+            setMatch(updatedMatch);
+            if (updatedMatch.currentInnings) {
+                setInnings(updatedMatch.currentInnings);
+            }
+        } catch (err) {
+            console.error("❌ Failed to end innings", err);
+            alert("Failed to end innings: " + (err.response?.data?.message || err.message));
+        }
+    };
+
+    /* ======================================================
        HANDLE MATCH END
     ====================================================== */
     const handleMatchEnd = (status) => {
@@ -364,9 +389,6 @@ export default function ScoringPage() {
                 <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-lg shadow-md text-center border border-blue-400">
                     <div className="text-sm font-semibold mb-1">
                         Target: {match.target}
-                    </div>
-                    <div className="text-lg font-bold">
-                        Need {Math.max(0, match.target - (innings.totalRuns || 0))} runs from {Math.max(0, (match.overs * 6) - Math.floor((innings.totalOvers || 0) * 6) - ((innings.totalOvers || 0) % 1) * 10)} balls
                     </div>
                 </div>
             </div>
@@ -409,6 +431,16 @@ export default function ScoringPage() {
                     className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
                 >
                     ↶ Undo Last Ball
+                </button>
+            )}
+
+            {/* END INNINGS BUTTON - show when innings is active */}
+            {inningsStarted && !innings?.completed && (
+                <button
+                    onClick={endInnings}
+                    className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-lg font-medium transition-colors mt-4 mx-2 sm:mx-4 md:mx-6"
+                >
+                    🏏 End Innings
                 </button>
             )}
 
