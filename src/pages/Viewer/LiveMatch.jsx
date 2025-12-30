@@ -100,13 +100,7 @@ const LiveMatch = () => {
     // Listen for innings complete events
     socket.on("inningsComplete", (data) => {
       console.log("🏏 Innings complete event received:", data);
-      if (data.inningsNumber === 1) {
-        // First innings completed, set target for second innings
-        setMatch((prev) => ({
-          ...prev,
-          target: data.runs + 1
-        }));
-      }
+      // Target is now handled server-side and persisted in database
     });
 
     // Listen for live score updates
@@ -445,6 +439,7 @@ const LiveMatch = () => {
             </p>
             <p className="text-sm text-gray-500">CRR: {crr}</p>
             {rrr && <p className="text-sm text-gray-500">RRR: {rrr}</p>}
+            {match.target && activeInnings?.inningsNumber === 2 && <p className="text-sm text-gray-500">Target: {match.target}</p>}
             {targetDisplay && <p className="text-sm font-semibold text-blue-600">{targetDisplay}</p>}
           </div>
 
