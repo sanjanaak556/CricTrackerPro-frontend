@@ -397,6 +397,9 @@ const LiveMatch = () => {
         {activeInnings && (
           <div className="mt-4 flex items-center justify-center">
             <div className="bg-gradient-to-r from-green-600 to-blue-600 text-white px-6 py-3 rounded-lg shadow-md text-center border border-green-400 animate-pulse">
+              <div className="text-sm font-semibold mb-1">
+                {activeInnings.inningsNumber === 1 ? "1st Innings" : "2nd Innings"}
+              </div>
               <div className="flex items-center gap-2 text-sm font-semibold">
                 <span className="text-lg animate-bounce">🏏</span>
                 <span>Now Batting</span>
