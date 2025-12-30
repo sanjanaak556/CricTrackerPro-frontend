@@ -43,7 +43,7 @@ const LiveMatch = () => {
   const [loading, setLoading] = useState(true);
   const [players, setPlayers] = useState(null);
 
-  // ✨ NEW: match event animation state
+  //  NEW: match event animation state
   const [matchEvent, setMatchEvent] = useState(null);
   const [lastBallId, setLastBallId] = useState(null); // 🔧 FIX: prevent repeat animation
 
@@ -95,6 +95,18 @@ const LiveMatch = () => {
     socket.on("inningsStarted", (data) => {
       console.log("🏏 Innings started event received:", data);
       setActiveInnings(data.innings);
+    });
+
+    // Listen for innings complete events
+    socket.on("inningsComplete", (data) => {
+      console.log("🏏 Innings complete event received:", data);
+      if (data.inningsNumber === 1) {
+        // First innings completed, set target for second innings
+        setMatch((prev) => ({
+          ...prev,
+          target: data.runs + 1
+        }));
+      }
     });
 
     // Listen for live score updates
@@ -317,6 +329,17 @@ const LiveMatch = () => {
       ? ((match.target - match.currentScore.runs) / remainingOvers).toFixed(2)
       : null;
 
+  // Calculate target display for second innings
+  const targetDisplay = match.target && activeInnings?.inningsNumber === 2
+    ? (() => {
+        const runsNeeded = match.target - match.currentScore.runs;
+        const totalBalls = totalOvers * 6;
+        const ballsBowled = Math.floor(oversBowled) * 6 + (oversBowled % 1) * 10; // approximate balls in current over
+        const ballsRemaining = Math.max(0, totalBalls - ballsBowled);
+        return runsNeeded > 0 ? `Need ${runsNeeded} runs from ${ballsRemaining} balls` : null;
+      })()
+    : null;
+
   /* -------------------- UI -------------------- */
   return (
     <div className="relative p-4 md:p-6 space-y-6 dark:text-white">
@@ -422,6 +445,7 @@ const LiveMatch = () => {
             </p>
             <p className="text-sm text-gray-500">CRR: {crr}</p>
             {rrr && <p className="text-sm text-gray-500">RRR: {rrr}</p>}
+            {targetDisplay && <p className="text-sm font-semibold text-blue-600">{targetDisplay}</p>}
           </div>
 
           <button

@@ -147,6 +147,17 @@ export default function ScoringPage() {
             setInnings(data.innings);
         });
 
+        socket.on("inningsComplete", (data) => {
+            console.log("🏏 Innings complete event received:", data);
+            if (data.inningsNumber === 1) {
+                // First innings completed, set target for second innings
+                setMatch((prev) => ({
+                    ...prev,
+                    target: data.runs + 1
+                }));
+            }
+        });
+
         socket.on("liveScoreUpdate", (data) => {
             setInnings((prev) => ({
                 ...prev,
@@ -332,12 +343,29 @@ export default function ScoringPage() {
         {innings && (
             <div className="flex items-center justify-center">
                 <div className="bg-gradient-to-r from-green-600 to-blue-600 text-white px-6 py-3 rounded-lg shadow-md text-center border border-green-400 animate-pulse">
+                    <div className="text-sm font-semibold mb-1">
+                        {innings.inningsNumber === 1 ? "1st Innings" : "2nd Innings"}
+                    </div>
                     <div className="flex items-center gap-2 text-sm font-semibold">
                         <span className="text-lg animate-bounce">🏏</span>
                         <span>Now Batting</span>
                     </div>
                     <div className="text-lg font-bold mt-1">
                         {innings.battingTeam?.name || (innings.battingTeam === match?.teamA?._id ? match.teamA.name : match?.teamB?.name)}
+                    </div>
+                </div>
+            </div>
+        )}
+
+        {/* TARGET DISPLAY */}
+        {match?.target && innings?.inningsNumber === 2 && (
+            <div className="flex items-center justify-center">
+                <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-lg shadow-md text-center border border-blue-400">
+                    <div className="text-sm font-semibold mb-1">
+                        Target: {match.target}
+                    </div>
+                    <div className="text-lg font-bold">
+                        Need {Math.max(0, match.target - (innings.totalRuns || 0))} runs from {Math.max(0, (match.overs * 6) - Math.floor((innings.totalOvers || 0) * 6) - ((innings.totalOvers || 0) % 1) * 10)} balls
                     </div>
                 </div>
             </div>
