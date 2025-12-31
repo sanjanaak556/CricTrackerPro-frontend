@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect, useCallback } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { setTheme } from "../../utils/theme";
 import defaultAvatar from "../../assets/avatar_img.jpg";
 import api from "../../services/api";
 
-import { Bell, Menu, Moon, Sun, Home, MoreVertical } from "lucide-react";
+import { Bell, Menu, Moon, Sun, Home, MoreVertical, Search } from "lucide-react";
 
 export default function DashboardNavbar({ sidebarOpen, setSidebarOpen }) {
   const [profileOpen, setProfileOpen] = useState(false);
@@ -13,6 +13,14 @@ export default function DashboardNavbar({ sidebarOpen, setSidebarOpen }) {
   // USER ROLE
   const [profileImage, setProfileImage] = useState(null);
   const [role, setRole] = useState(null);
+
+  // SEARCH
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [showResults, setShowResults] = useState(false);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const loadUser = async () => {
@@ -40,6 +48,64 @@ export default function DashboardNavbar({ sidebarOpen, setSidebarOpen }) {
   useEffect(() => {
     setTheme(theme);
   }, [theme]);
+
+  // SEARCH FUNCTIONALITY - Only for Admin
+  const performSearch = useCallback(async (query) => {
+    if (!query.trim() || role !== "admin") {
+      setSearchResults([]);
+      setShowResults(false);
+      return;
+    }
+
+    setSearchLoading(true);
+    try {
+      const [matchesRes, playersRes, teamsRes] = await Promise.all([
+        api.get(`/matches/search?name=${encodeURIComponent(query)}`),
+        api.get(`/players/search?name=${encodeURIComponent(query)}`),
+        api.get(`/teams/search?name=${encodeURIComponent(query)}`)
+      ]);
+
+      const results = [
+        ...matchesRes.matches.map(m => ({ ...m, type: 'match' })),
+        ...playersRes.players.map(p => ({ ...p, type: 'player' })),
+        ...teamsRes.teams.map(t => ({ ...t, type: 'team' }))
+      ];
+
+      setSearchResults(results);
+      setShowResults(true);
+    } catch (err) {
+      console.error("Search error:", err);
+      setSearchResults([]);
+    } finally {
+      setSearchLoading(false);
+    }
+  }, [role]);
+
+  // Debounced search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      performSearch(searchQuery);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery, performSearch]);
+
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const handleResultClick = (result) => {
+    setShowResults(false);
+    setSearchQuery("");
+
+    if (result.type === 'match') {
+      navigate(`/admin/matches/view/${result._id}`);
+    } else if (result.type === 'player') {
+      navigate(`/admin/players`);
+    } else if (result.type === 'team') {
+      navigate(`/admin/teams`);
+    }
+  };
 
   return (
     <nav
@@ -70,18 +136,57 @@ export default function DashboardNavbar({ sidebarOpen, setSidebarOpen }) {
       </button>
 
       {/* CENTER — SEARCH BAR */}
-      <div className="flex-1 flex justify-center px-4">
-        <input
-          type="text"
-          placeholder="Search team / match..."
-          className="
-            w-full max-w-md px-4 py-2 border rounded-lg shadow-sm focus:outline-none
-            bg-white dark:bg-gray-700
-            text-gray-900 dark:text-white
-            placeholder-gray-500 dark:placeholder-gray-300
-          "
-        />
-      </div>
+      {role === "admin" && (
+        <div className="flex-1 flex justify-center px-4 relative">
+          <div className="relative w-full max-w-md">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={handleSearchChange}
+              placeholder="Search team / match..."
+              className="
+                w-full px-4 py-2 border rounded-lg shadow-sm focus:outline-none
+                bg-white dark:bg-gray-700
+                text-gray-900 dark:text-white
+                placeholder-gray-500 dark:placeholder-gray-300
+              "
+            />
+            {searchLoading && (
+              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900 dark:border-white"></div>
+              </div>
+            )}
+            {showResults && searchResults.length > 0 && (
+              <div className="
+                absolute top-full mt-1 w-full bg-white dark:bg-gray-800 
+                border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg 
+                max-h-64 overflow-y-auto z-50
+              ">
+                {searchResults.map((result, index) => (
+                  <button
+                    key={`${result.type}-${result._id || index}`}
+                    onClick={() => handleResultClick(result)}
+                    className="
+                      w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 
+                      flex items-center gap-3 border-b border-gray-100 dark:border-gray-700 last:border-b-0
+                    "
+                  >
+                    <Search className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                    <div>
+                      <div className="font-medium text-gray-900 dark:text-white">
+                        {result.name || result.matchName}
+                      </div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400 capitalize">
+                        {result.type} {result.role && `• ${result.role}`}
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* RIGHT SIDE */}
       <div className="flex items-center gap-4">
