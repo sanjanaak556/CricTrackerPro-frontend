@@ -18,16 +18,61 @@ export default function Navbar() {
 
       {/* Links */}
       <ul className="hidden md:flex items-center gap-6 text-white font-medium">
-        <li className="hover:text-blue-300 cursor-pointer">
-          <Link to="/">Home</Link>
+        <li
+          className="hover:text-blue-700 cursor-pointer"
+          onClick={() =>
+            document.getElementById("home")?.scrollIntoView({ behavior: "smooth" })
+          }
+        >
+          Home
         </li>
-        <li className="hover:text-blue-300 cursor-pointer">Features</li>
-        <li className="hover:text-blue-300 cursor-pointer">Live Matches</li>
-        <li className="hover:text-blue-300 cursor-pointer">Teams</li>
-        <li className="hover:text-blue-300 cursor-pointer">Reports</li>
-        <li className="hover:text-blue-300 cursor-pointer">About</li>
-        <li className="hover:text-blue-300 cursor-pointer">Contact</li>
+
+        <li
+          className="hover:text-blue-700 cursor-pointer"
+          onClick={() =>
+            document.getElementById("features")?.scrollIntoView({ behavior: "smooth" })
+          }
+        >
+          Features
+        </li>
+
+        <li
+          className="hover:text-blue-700 cursor-pointer"
+          onClick={() =>
+            document.getElementById("live-matches")?.scrollIntoView({ behavior: "smooth" })
+          }
+        >
+          Live Matches
+        </li>
+
+        <li
+          className="hover:text-blue-700 cursor-pointer"
+          onClick={() =>
+            document.getElementById("testimonials")?.scrollIntoView({ behavior: "smooth" })
+          }
+        >
+          Testimonials
+        </li>
+
+        <li
+          className="hover:text-blue-700 cursor-pointer"
+          onClick={() =>
+            document.getElementById("about")?.scrollIntoView({ behavior: "smooth" })
+          }
+        >
+          About
+        </li>
+
+        <li
+          className="hover:text-blue-700 cursor-pointer"
+          onClick={() =>
+            document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })
+          }
+        >
+          Contact
+        </li>
       </ul>
+
 
       {/* Right Side Buttons */}
       <div className="flex items-center gap-4">

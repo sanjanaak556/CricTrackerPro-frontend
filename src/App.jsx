@@ -24,6 +24,12 @@ import Reports from "./pages/Admin/Reports";
 import ViewReportDetails from "./components/dashboard/admin/ViewReportDetails";
 import UsersAndRoles from "./pages/Admin/UsersAndRoles";
 
+// Scorer
+import ScorerDashboard from "./pages/Scorer/ScorerDashboard";
+import ManageScorerMatches from "./pages/Scorer/ManageScorerMatches";
+import Scoreboard from "./pages/Scorer/Scoreboard";
+import ScorerMatchHistory from "./pages/Scorer/MatchHistory";
+import ScoringPage from "./pages/Scorer/ScoringPage";
 
 // Viewer
 import ViewerDashboard from "./pages/Viewer/ViewerDashboard";
@@ -36,14 +42,6 @@ import FollowedTeams from "./pages/Viewer/FollowedTeams";
 import MatchPreview from "./pages/Viewer/MatchPreview";
 import MatchSummary from "./pages/Viewer/MatchSummary";
 import LiveMatch from "./pages/Viewer/LiveMatch";
-
-
-// Scorer
-import ScorerDashboard from "./pages/Scorer/ScorerDashboard";
-import ManageScorerMatches from "./pages/Scorer/ManageScorerMatches";
-import Scoreboard from "./pages/Scorer/Scoreboard";
-import ScorerMatchHistory from "./pages/Scorer/MatchHistory";
-import ScoringPage from "./pages/Scorer/ScoringPage";
 
 
 function App() {
