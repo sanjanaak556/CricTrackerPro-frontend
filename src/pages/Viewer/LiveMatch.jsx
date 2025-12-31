@@ -36,9 +36,7 @@ const LiveMatch = () => {
 
   const [match, setMatch] = useState(null);
   const [activeInnings, setActiveInnings] = useState(null);
-  const [activeOver, setActiveOver] = useState(null);
-  const [overs, setOvers] = useState([]);
-  const [openOverId, setOpenOverId] = useState(null);
+  const [recentBalls, setRecentBalls] = useState([]); // Store last 10 balls
   const [commentary, setCommentary] = useState([]);
   const [loading, setLoading] = useState(true);
   const [players, setPlayers] = useState(null);
@@ -68,11 +66,22 @@ const LiveMatch = () => {
       setActiveInnings(current || null);
 
       if (current?._id) {
-        const overRes = await api.get(`/overs/active/${current._id}`);
-        setActiveOver(overRes.activeOver || null);
-
+        // Fetch recent balls from all overs
         const oversRes = await api.get(`/overs/innings/${current._id}`);
-        setOvers(oversRes.overs || []);
+        const allBalls = oversRes.overs?.flatMap(over => 
+          (over.balls || []).map(ball => ({
+            ...ball,
+            overNumber: over.overNumber,
+            bowler: over.bowler,
+            ballNumber: ball.ballNumber
+          }))
+        ) || [];
+        
+        // Get last 10 balls, most recent first
+        const sortedBalls = allBalls.sort((a, b) => 
+          new Date(b.createdAt || b.timestamp) - new Date(a.createdAt || a.timestamp)
+        );
+        setRecentBalls(sortedBalls.slice(0, 10));
 
         const commRes = await api.get(`/commentary/innings/${current._id}`);
         setCommentary(commRes.commentary || []);
@@ -95,6 +104,7 @@ const LiveMatch = () => {
     socket.on("inningsStarted", (data) => {
       console.log("🏏 Innings started event received:", data);
       setActiveInnings(data.innings);
+      setRecentBalls([]); // Reset recent balls for new innings
     });
 
     // Listen for innings complete events
@@ -138,39 +148,20 @@ const LiveMatch = () => {
 
     // Listen for ball added events
     socket.on("ballAdded", (data) => {
-      const { ball, overId, overNumber, bowler } = data;
+      const { ball, overNumber, bowler } = data;
 
-      // Update active over if it's the current one
-      setActiveOver((prev) => {
-        if (prev && prev._id === overId) {
-          return {
-            ...prev,
-            balls: [...(prev.balls || []), ball],
-            bowler: bowler
-          };
-        }
-        return prev;
-      });
+      // Add new ball to recent balls (most recent first)
+      const newBallWithContext = {
+        ...ball,
+        overNumber: overNumber,
+        bowler,
+        ballNumber: ball.ballNumber
+      };
 
-      // Update overs list
-      setOvers((prev) => {
-        const existingOverIndex = prev.findIndex(o => o._id === overId);
-        if (existingOverIndex >= 0) {
-          const updatedOvers = [...prev];
-          updatedOvers[existingOverIndex] = {
-            ...updatedOvers[existingOverIndex],
-            balls: [...(updatedOvers[existingOverIndex].balls || []), ball]
-          };
-          return updatedOvers;
-        } else {
-          // New over
-          return [...prev, {
-            _id: overId,
-            overNumber,
-            bowler,
-            balls: [ball]
-          }];
-        }
+      setRecentBalls(prev => {
+        const updated = [newBallWithContext, ...prev];
+        // Keep only last 10 balls
+        return updated.slice(0, 10);
       });
 
       // Trigger match event animation for special balls
@@ -188,44 +179,15 @@ const LiveMatch = () => {
 
     // Listen for ball removed events (for undo)
     socket.on("ballRemoved", (data) => {
-      const { overId } = data;
-
-      // Update active over
-      setActiveOver((prev) => {
-        if (prev && prev._id === overId) {
-          const balls = prev.balls || [];
-          return {
-            ...prev,
-            balls: balls.slice(0, -1) // Remove last ball
-          };
-        }
-        return prev;
-      });
-
-      // Update overs list
-      setOvers((prev) => {
-        return prev.map(over => {
-          if (over._id === overId) {
-            const balls = over.balls || [];
-            return {
-              ...over,
-              balls: balls.slice(0, -1) // Remove last ball
-            };
-          }
-          return over;
-        });
-      });
+      const { ballId } = data;
+      
+      // Remove the undone ball from recent balls
+      setRecentBalls(prev => prev.filter(ball => ball._id !== ballId));
     });
 
     // Listen for new commentary
     socket.on("newCommentary", (data) => {
       setCommentary((prev) => [data, ...prev]);
-    });
-
-    // Listen for over complete
-    socket.on("overComplete", (data) => {
-      // Reset active over when over is completed
-      setActiveOver(null);
     });
 
     // Cleanup on unmount
@@ -247,23 +209,23 @@ const LiveMatch = () => {
 
   /*  MATCH EVENT DETECTION (4 / 6 / WICKET) */
   useEffect(() => {
-    if (!activeOver?.balls?.length) return;
+    if (!recentBalls.length) return;
 
-    const lastBall = activeOver.balls[activeOver.balls.length - 1];
+    const latestBall = recentBalls[0]; // Most recent ball is first in array
 
     // 🔧 FIX: avoid animation on polling refresh
-    if (lastBall._id === lastBallId) return;
+    if (latestBall._id === lastBallId) return;
 
-    setLastBallId(lastBall._id);
+    setLastBallId(latestBall._id);
 
-    if (lastBall.isWicket) setMatchEvent("WICKET");
-    else if (lastBall.runs === 6) setMatchEvent("SIX");
-    else if (lastBall.runs === 4) setMatchEvent("FOUR");
+    if (latestBall.isWicket) setMatchEvent("WICKET");
+    else if (latestBall.runs === 6) setMatchEvent("SIX");
+    else if (latestBall.runs === 4) setMatchEvent("FOUR");
 
-    if (lastBall.isWicket || lastBall.runs === 4 || lastBall.runs === 6) {
+    if (latestBall.isWicket || latestBall.runs === 4 || latestBall.runs === 6) {
       setTimeout(() => setMatchEvent(null), 1800);
     }
-  }, [activeOver]); // 👈 correct dependency
+  }, [recentBalls]); // 👈 correct dependency
 
   /* 🔗 CONNECTION MONITORING & FALLBACK POLLING */
   useEffect(() => {
@@ -324,12 +286,13 @@ const LiveMatch = () => {
       ? ((match.target - match.currentScore.runs) / remainingOvers).toFixed(2)
       : null;
 
-  // Calculate target display for second innings
+  // Calculate target display for second innings - USING SCORING PAGE LOGIC
   const targetDisplay = match.target && activeInnings?.inningsNumber === 2
     ? (() => {
-        const runsNeeded = match.target - match.currentScore.runs;
+        const runsNeeded = Math.max(0, match.target - (match.currentScore?.runs || 0));
         const totalBalls = totalOvers * 6;
-        const ballsBowled = Math.floor(oversBowled) * 6 + (oversBowled % 1) * 10; // approximate balls in current over
+        const oversDecimal = match.currentScore?.overs || 0;
+        const ballsBowled = Math.floor(oversDecimal) * 6 + Math.round((oversDecimal % 1) * 10);
         const ballsRemaining = Math.max(0, totalBalls - ballsBowled);
         return runsNeeded > 0 ? `Need ${runsNeeded} runs from ${ballsRemaining} balls` : null;
       })()
@@ -411,6 +374,20 @@ const LiveMatch = () => {
           </p>
         </div>
 
+        {/* TARGET DISPLAY IN MATCH HEADER - USING SCORING PAGE LOGIC */}
+        {match?.target && activeInnings?.inningsNumber === 2 && (
+          <div className="mt-4 flex items-center justify-center">
+            <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-lg shadow-md text-center border border-blue-400">
+              <div className="text-sm font-semibold mb-1">
+                Target: {match.target}
+              </div>
+              <div className="text-lg font-bold">
+                Need {Math.max(0, match.target - (match.currentScore?.runs || 0))} runs from {Math.max(0, (match.overs * 6) - Math.floor((match.currentScore?.overs || 0) * 6) - Math.round(((match.currentScore?.overs || 0) % 1) * 10))} balls
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* BATTING TEAM INDICATOR */}
         {activeInnings && (
           <div className="mt-4 flex items-center justify-center">
@@ -440,8 +417,14 @@ const LiveMatch = () => {
             </p>
             <p className="text-sm text-gray-500">CRR: {crr}</p>
             <p className="text-sm text-gray-500">RRR: {rrr || 'N/A'}</p>
-            {match.target && activeInnings?.inningsNumber === 2 && <p className="text-sm text-gray-500">Target: {match.target}</p>}
-            {targetDisplay && <p className="text-sm font-semibold text-blue-600">{targetDisplay}</p>}
+            {match.target && activeInnings?.inningsNumber === 2 && (
+              <>
+                <p className="text-sm text-gray-500">Target: {match.target}</p>
+                <p className="text-sm font-semibold text-blue-600">
+                  Need {Math.max(0, match.target - (match.currentScore?.runs || 0))} runs from {Math.max(0, (match.overs * 6) - Math.floor((match.currentScore?.overs || 0) * 6) - Math.round(((match.currentScore?.overs || 0) % 1) * 10))} balls
+                </p>
+              </>
+            )}
           </div>
 
           <button
@@ -594,17 +577,17 @@ const LiveMatch = () => {
         </div>
       )}
 
-      {/* ================= ACTIVE OVER ================= */}
-      {activeOver && (
-        <div className="bg-white dark:bg-gray-900 p-4 rounded-xl border dark:border-gray-700">
-          <h3 className="font-semibold mb-2">
-            Over {activeOver.overNumber} — {activeOver.bowler?.name}
-          </h3>
+      {/* ================= RECENT BALLS ================= */}
+      <div className="bg-white dark:bg-gray-900 p-4 rounded-xl border dark:border-gray-700">
+        <h3 className="font-semibold mb-3">Recent Balls (Last 10)</h3>
+        {recentBalls.length === 0 ? (
+          <p className="text-sm text-gray-500 text-center py-4">No balls bowled yet</p>
+        ) : (
           <div className="flex gap-2 flex-wrap">
-            {activeOver.balls?.map((ball) => (
+            {recentBalls.map((ball, index) => (
               <span
-                key={ball._id}
-                className={`w-9 h-9 flex items-center justify-center rounded-full text-sm font-bold ${ballStyle(
+                key={ball._id || `ball-${index}`}
+                className={`w-10 h-10 flex items-center justify-center rounded-full text-sm font-bold ${ballStyle(
                   ball
                 )}`}
               >
@@ -612,49 +595,8 @@ const LiveMatch = () => {
               </span>
             ))}
           </div>
-        </div>
-      )}
-
-      {/* ================= OVER BY OVER ================= */}
-      {overs.length > 0 && (
-        <div className="bg-white dark:bg-gray-900 p-4 rounded-xl border dark:border-gray-700">
-          <h3 className="font-semibold mb-3">Over by Over</h3>
-          <div className="space-y-2">
-            {[...overs].reverse().map((over) => (
-              <div
-                key={over._id}
-                className="border rounded-lg dark:border-gray-700"
-              >
-                <button
-                  onClick={() =>
-                    setOpenOverId(openOverId === over._id ? null : over._id)
-                  }
-                  className="w-full flex justify-between items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800"
-                >
-                  <span className="font-medium">Over {over.overNumber}</span>
-                  <span className="text-sm text-gray-500">
-                    {over.balls?.length || 0} balls
-                  </span>
-                </button>
-                {openOverId === over._id && (
-                  <div className="px-4 pb-3 flex gap-2 flex-wrap">
-                    {over.balls?.map((ball) => (
-                      <span
-                        key={ball._id}
-                        className={`w-9 h-9 flex items-center justify-center rounded-full text-sm font-bold ${ballStyle(
-                          ball
-                        )}`}
-                      >
-                        {ballBadge(ball)}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* ================= COMMENTARY ================= */}
       <div className="bg-white dark:bg-gray-900 p-4 rounded-xl border dark:border-gray-700">
