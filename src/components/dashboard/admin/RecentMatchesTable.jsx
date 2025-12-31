@@ -1,24 +1,4 @@
-export default function RecentMatchesTable() {
-  const matches = [
-    {
-      id: 1,
-      teams: "Team A vs Team B",
-      status: "Completed",
-      result: "Team A won",
-    },
-    {
-      id: 2,
-      teams: "Team C vs Team D",
-      status: "Ongoing",
-      result: "Live Now",
-    },
-    {
-      id: 3,
-      teams: "Team E vs Team F",
-      status: "Upcoming",
-      result: "–",
-    },
-  ];
+export default function RecentMatchesTable({ matches = [] }) {
 
   return (
     <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md">
@@ -38,19 +18,19 @@ export default function RecentMatchesTable() {
         <tbody>
           {matches.map((m, index) => (
             <tr
-              key={m.id}
+              key={m._id}
               className="border-b dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
             >
               <td className="py-3">{index + 1}</td>
-              <td>{m.teams}</td>
+              <td>{`${m.teamA.name} vs ${m.teamB.name}`}</td>
               <td>
                 <span
                   className={`
                     px-2 py-1 rounded text-sm
                     ${
-                      m.status === "Completed"
+                      m.status === "completed"
                         ? "bg-green-200 text-green-700"
-                        : m.status === "Ongoing"
+                        : m.status === "live"
                         ? "bg-blue-200 text-blue-700"
                         : "bg-gray-300 text-gray-800"
                     }
@@ -60,12 +40,16 @@ export default function RecentMatchesTable() {
                 </span>
               </td>
               <td>{m.result}</td>
-              <td className="flex gap-3 py-3">
-                <button className="text-blue-600 hover:underline">View</button>
-                <button className="text-green-600 hover:underline">Live</button>
-                <button className="text-purple-600 hover:underline">
-                  Report
-                </button>
+              <td className="py-3">
+                {m.status === "upcoming" && (
+                  <button className="text-blue-600 hover:text-blue-700 cursor-pointer">View Details</button>
+                )}
+                {m.status === "live" && (
+                  <button className="text-green-600 hover:text-green-700 cursor-pointer">View Live</button>
+                )}
+                {m.status === "completed" && (
+                  <button className="text-purple-600 hover:text-purple-700 cursor-pointer">View Report</button>
+                )}
               </td>
             </tr>
           ))}

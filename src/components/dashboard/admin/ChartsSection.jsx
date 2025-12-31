@@ -3,25 +3,25 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearSca
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement);
 
-export default function ChartsSection() {
-  // Pie chart — Team win %
+export default function ChartsSection({ charts }) {
+  // Pie chart — Team Win Percentage
   const pieData = {
-    labels: ["Team A", "Team B", "Team C", "Team D"],
+    labels: charts?.teamWinPercentage?.map(item => item._id) || [],
     datasets: [
       {
-        data: [40, 25, 20, 15],
-        backgroundColor: ["#3b82f6", "#22c55e", "#f59e0b", "#ef4444"],
+        data: charts?.teamWinPercentage?.map(item => item.percentage) || [],
+        backgroundColor: ["#3b82f6", "#22c55e", "#f59e0b", "#ef4444", "#8b5cf6", "#06b6d4"],
       },
     ],
   };
 
-  // Bar chart — Top run-scoring teams
+  // Bar chart — Top Run-Scoring Teams
   const barData = {
-    labels: ["Team A", "Team B", "Team C", "Team D"],
+    labels: charts?.topRunScoring?.map(item => item.teamName) || [],
     datasets: [
       {
-        label: "Runs",
-        data: [3200, 2800, 2500, 2100],
+        label: "Total Runs",
+        data: charts?.topRunScoring?.map(item => item.totalRuns) || [],
         backgroundColor: "#3b82f6",
       },
     ],

@@ -1,16 +1,16 @@
 import { Users, Trophy, ListChecks, ShieldCheck } from "lucide-react";
 
-export default function OverviewCards() {
+export default function OverviewCards({ stats }) {
   const cards = [
-    { title: "Total Teams", value: 16, icon: Users, color: "bg-blue-500" },
+    { title: "Total Teams", value: stats?.totalTeams || 0, icon: Users, color: "bg-blue-500" },
     {
       title: "Total Players",
-      value: 220,
+      value: stats?.totalPlayers || 0,
       icon: ShieldCheck,
       color: "bg-green-500",
     },
-    { title: "Matches", value: 48, icon: ListChecks, color: "bg-orange-500" },
-    { title: "Active Scorers", value: 6, icon: Trophy, color: "bg-purple-500" },
+    { title: "Matches", value: stats?.totalMatches || 0, icon: ListChecks, color: "bg-orange-500" },
+    { title: "Active Scorers", value: stats?.activeScorers || 0, icon: Trophy, color: "bg-purple-500" },
   ];
 
   return (
