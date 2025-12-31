@@ -69,7 +69,7 @@ const LiveMatch = () => {
 
       if (current?._id) {
         const overRes = await api.get(`/overs/active/${current._id}`);
-        setActiveOver(overRes || null);
+        setActiveOver(overRes.activeOver || null);
 
         const oversRes = await api.get(`/overs/innings/${current._id}`);
         setOvers(oversRes.overs || []);
