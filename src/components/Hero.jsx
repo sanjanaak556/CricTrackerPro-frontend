@@ -35,9 +35,17 @@ export default function Hero() {
                             Start Scoring
                         </button>
 
-                        <button className="px-8 py-3 border border-white text-white rounded-lg text-lg hover:bg-white hover:text-black transition shadow-lg cursor-pointer">
+                        <button
+                            onClick={() =>
+                                document
+                                    .getElementById("live-matches")
+                                    ?.scrollIntoView({ behavior: "smooth" })
+                            }
+                            className="px-8 py-3 border border-white text-white rounded-lg text-lg hover:bg-white hover:text-black transition shadow-lg cursor-pointer"
+                        >
                             Watch Live Matches
                         </button>
+
                     </div>
                 </div>
             </div>

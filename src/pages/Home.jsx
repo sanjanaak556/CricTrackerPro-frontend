@@ -1,5 +1,6 @@
 import Navbar from "../components/Navbar";
 import Hero from "../components/Hero";
+import LiveMatchSection from "../components/LiveMatchSection";
 import Footer from "../components/Footer";
 import FeaturesSection from "../components/FeaturesSection";
 import TestimonialsSection from "../components/TestimonialsSection";
@@ -11,6 +12,7 @@ export default function Home() {
     <>
       <Navbar />
       <Hero />
+      <LiveMatchSection />
       <FeaturesSection />
       <AboutSection />
       <TestimonialsSection />
