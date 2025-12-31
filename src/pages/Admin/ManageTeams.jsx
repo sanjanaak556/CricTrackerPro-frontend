@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from "react";
 import api from "../../services/api";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 
 export default function ManageTeams() {
+  const [searchParams] = useSearchParams();
+  const searchQuery = searchParams.get('search') || '';
+
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -20,12 +23,13 @@ export default function ManageTeams() {
 
   useEffect(() => {
     fetchTeams();
-  }, []);
+  }, [searchQuery]);
 
   const fetchTeams = async () => {
     try {
       setLoading(true);
-      const response = await api.get("/admin/teams");
+      const endpoint = searchQuery ? `/admin/teams/search?name=${encodeURIComponent(searchQuery)}` : "/admin/teams";
+      const response = await api.get(endpoint);
       setTeams(response.teams || []);
     } catch (err) {
       setError("Failed to load teams");

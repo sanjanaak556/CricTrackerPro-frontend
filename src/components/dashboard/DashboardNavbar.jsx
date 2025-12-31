@@ -101,9 +101,9 @@ export default function DashboardNavbar({ sidebarOpen, setSidebarOpen }) {
     if (result.type === 'match') {
       navigate(`/admin/matches/view/${result._id}`);
     } else if (result.type === 'player') {
-      navigate(`/admin/players`);
+      navigate(`/admin/players?search=${encodeURIComponent(searchQuery)}`);
     } else if (result.type === 'team') {
-      navigate(`/admin/teams`);
+      navigate(`/admin/teams?search=${encodeURIComponent(searchQuery)}`);
     }
   };
 
@@ -143,7 +143,7 @@ export default function DashboardNavbar({ sidebarOpen, setSidebarOpen }) {
               type="text"
               value={searchQuery}
               onChange={handleSearchChange}
-              placeholder="Search team / match..."
+              placeholder="Search team / player / match..."
               className="
                 w-full px-4 py-2 border rounded-lg shadow-sm focus:outline-none
                 bg-white dark:bg-gray-700

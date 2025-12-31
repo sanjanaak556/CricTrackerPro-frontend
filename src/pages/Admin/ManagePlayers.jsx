@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from "react";
 import api from "../../services/api";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Crown } from "lucide-react";
 
 export default function ManagePlayers() {
+  const [searchParams] = useSearchParams();
+  const searchQuery = searchParams.get('search');
+
   const [players, setPlayers] = useState([]);
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -27,12 +30,13 @@ export default function ManagePlayers() {
   useEffect(() => {
     fetchPlayers();
     fetchTeams();
-  }, []);
+  }, [searchQuery]);
 
   const fetchPlayers = async (page = 1) => {
     try {
       setLoading(true);
-      const response = await api.get(`/admin/players?page=${page}`);
+      const endpoint = searchQuery ? `/admin/players/search?name=${encodeURIComponent(searchQuery)}&page=${page}` : `/admin/players?page=${page}`;
+      const response = await api.get(endpoint);
       setPlayers(response.players || []);
       setCurrentPage(response.pagination?.currentPage || 1);
       setPagination(response.pagination);
