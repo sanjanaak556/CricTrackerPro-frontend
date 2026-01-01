@@ -363,7 +363,7 @@ export default function ManagePlayers() {
                         <img
                           src={player.image || "/default-player.png"}
                           alt={player.name}
-                          className="h-10 w-10 rounded-full object-contain bg-gray-200"
+                          className="h-10 w-10 rounded-full object-cover bg-gray-200"
                         />
                         {player.isCaptain && (
                           <div className="absolute -top-1 -right-1 bg-yellow-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold border border-white">
@@ -443,7 +443,7 @@ export default function ManagePlayers() {
                   <img
                     src={player.image || "/default-player.png"}
                     alt={player.name}
-                    className="h-12 w-12 rounded-full object-contain bg-gray-200"
+                    className="h-12 w-12 rounded-full object-cover bg-gray-200"
                   />
                   {player.isCaptain && (
                     <div className="absolute -top-1 -right-1 bg-yellow-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">

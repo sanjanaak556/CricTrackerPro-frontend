@@ -166,6 +166,17 @@ export default function ManageTeams() {
                 Team Logo
               </label>
 
+              {editingTeam && editingTeam.logo && (
+                <div className="mb-3">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Current Logo:</p>
+                  <img
+                    src={editingTeam.logo}
+                    alt={`${editingTeam.name} current logo`}
+                    className="w-16 h-16 object-contain rounded-lg border border-gray-200 dark:border-gray-600"
+                  />
+                </div>
+              )}
+
               <label
                 htmlFor="teamLogo"
                 className="inline-block cursor-pointer px-4 py-2 rounded-md
@@ -173,7 +184,7 @@ export default function ManageTeams() {
       text-gray-800 dark:text-gray-200
       hover:bg-gray-300 dark:hover:bg-gray-600"
               >
-                Choose File
+                {editingTeam && editingTeam.logo ? "Change Logo" : "Choose File"}
               </label>
 
               <span className="ml-3 text-sm text-gray-600 dark:text-gray-400">
@@ -204,6 +215,15 @@ export default function ManageTeams() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {teams.map((team) => (
           <div key={team._id} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+            {team.logo && (
+              <div className="flex justify-center mb-4">
+                <img
+                  src={team.logo}
+                  alt={`${team.name} logo`}
+                  className="w-16 h-16 object-cover rounded-lg border border-gray-200 dark:border-gray-600"
+                />
+              </div>
+            )}
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
               {team.name}
             </h3>
