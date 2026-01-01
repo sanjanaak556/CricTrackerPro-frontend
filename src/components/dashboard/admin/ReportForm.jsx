@@ -30,8 +30,8 @@ export default function ReportForm({ title, onSubmit, onCancel, initialData }) {
         ]);
 
         setMatches(mRes?.data ?? []);
-        setTeams(tRes?.data ?? []);
-        setPlayers(pRes?.data ?? []);
+        setTeams(tRes?.data?.teams ?? []);
+        setPlayers(pRes?.data?.players ?? []);
       } catch (err) {
         console.error("Failed to fetch form data:", err);
       }

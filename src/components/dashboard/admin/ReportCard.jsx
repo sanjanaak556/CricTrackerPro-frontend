@@ -3,14 +3,13 @@ import { Eye, Edit, Trash } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function ReportCard({ report, onEdit, onDelete }) {
-  // try to show readable title
-  const title =
-    report.match?.matchName ||
-    report.resultText ||
-    `Match #${report.matchNumber ?? ""}` ||
-    "Match Summary";
-
+  const title = report.matchId?.matchName || `Match #${report.matchId?.matchNumber ?? ""}` || "Match Summary";
+  const matchType = report.matchId?.matchType || "—";
   const createdAt = report.createdAt ? new Date(report.createdAt) : null;
+
+  const team1 = report.team1 || report.matchId?.teamA;
+  const team2 = report.team2 || report.matchId?.teamB;
+  const winner = report.winnerTeamId;
 
   return (
     <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow flex flex-col justify-between">
@@ -19,22 +18,42 @@ export default function ReportCard({ report, onEdit, onDelete }) {
           {title}
         </h2>
 
-        {createdAt && (
-          <p className="text-sm text-gray-500 dark:text-gray-300 mt-1">
-            {createdAt.toLocaleDateString()} {createdAt.toLocaleTimeString()}
-          </p>
-        )}
+        <p className="text-sm text-gray-500 dark:text-gray-300 mt-1">
+          {matchType} • {createdAt ? `${createdAt.toLocaleDateString()} ${createdAt.toLocaleTimeString()}` : ""}
+        </p>
 
-        <p className="mt-3 text-gray-700 dark:text-gray-200">
+        {/* Teams */}
+        <div className="mt-3 flex items-center gap-4">
+          {team1?.logo && (
+            <img src={team1.logo} alt={team1.name} className="w-8 h-8 rounded-full" />
+          )}
+          <span className="text-gray-700 dark:text-gray-200 font-medium">{team1?.name || "—"}</span>
+          <span className="text-gray-500">vs</span>
+          {team2?.logo && (
+            <img src={team2.logo} alt={team2.name} className="w-8 h-8 rounded-full" />
+          )}
+          <span className="text-gray-700 dark:text-gray-200 font-medium">{team2?.name || "—"}</span>
+        </div>
+
+        {/* Winner and Margin */}
+        <p className="mt-2 text-gray-700 dark:text-gray-200">
+          <strong>Winner:</strong>{" "}
+          {winner?.name ?? "—"}{" "}
+          {report.winType && report.winMargin ? `• ${report.winType} by ${report.winMargin}` : ""}
+        </p>
+
+        {/* Result Text */}
+        <p className="mt-2 text-gray-700 dark:text-gray-200">
           <strong>Result:</strong>{" "}
           {report.resultText ? report.resultText : "No summary text"}
         </p>
 
-        <p className="mt-2 text-gray-700 dark:text-gray-200">
-          <strong>Winner:</strong>{" "}
-          {report.winnerTeamId?.name ?? report.winnerName ?? "—"}{" "}
-          {report.winType && report.winMargin ? `• ${report.winType} by ${report.winMargin}` : ""}
-        </p>
+        {/* Awards */}
+        <div className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+          <p><strong>Player of the Match:</strong> {report.playerOfTheMatch?.name ?? "—"}</p>
+          <p><strong>Top Scorer:</strong> {report.topScorer?.playerId?.name ?? "—"}</p>
+          <p><strong>Best Bowler:</strong> {report.bestBowler?.playerId?.name ?? "—"}</p>
+        </div>
       </div>
 
       {/* ACTION BUTTONS */}
