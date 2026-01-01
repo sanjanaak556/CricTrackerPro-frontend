@@ -15,19 +15,33 @@ export default function MatchSummary() {
   useEffect(() => {
     if (!matchId) return;
 
+    // First, load match and players
     Promise.all([
       api.get(`/matches/${matchId}`),
       api.get(`/matches/${matchId}/players`),
-      api.get(`/match-summary/${matchId}`),
     ])
-      .then(([matchRes, playersRes, summaryRes]) => {
+      .then(([matchRes, playersRes]) => {
         setMatch(matchRes);
         setTeamsWithPlayers(playersRes);
-        setSummary(summaryRes);
+
+        // Then try to load summary, but don't fail if it doesn't exist
+        api.get(`/match-summary/${matchId}`)
+          .then((summaryRes) => {
+            setSummary(summaryRes);
+          })
+          .catch((summaryErr) => {
+            // If summary not found (404), just set to null - it's okay for abandoned matches
+            if (summaryErr.response?.status === 404) {
+              setSummary(null);
+            } else {
+              console.error("Failed to load match summary", summaryErr);
+              setError("Failed to load match summary");
+            }
+          });
       })
       .catch((err) => {
-        console.error("Failed to load match summary", err);
-        setError("Failed to load match summary");
+        console.error("Failed to load match data", err);
+        setError("Failed to load match data");
       })
       .finally(() => setLoading(false));
   }, [matchId]);
@@ -113,12 +127,14 @@ export default function MatchSummary() {
             {status}
           </span>
 
-          <button
-            onClick={handleDownloadPDF}
-            className="flex items-center gap-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
-            <Download size={16} /> Download PDF
-          </button>
+          {summary && (
+            <button
+              onClick={handleDownloadPDF}
+              className="flex items-center gap-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+            >
+              <Download size={16} /> Download PDF
+            </button>
+          )}
         </div>
       </div>
 

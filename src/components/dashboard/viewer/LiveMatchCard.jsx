@@ -89,7 +89,7 @@ const LiveMatchCard = ({ match }) => {
         className="mt-5 w-full py-2.5 flex items-center justify-center gap-2 
                    text-white font-semibold rounded-lg shadow 
                    bg-red-600 hover:bg-red-700 transition"
-        onClick={() => navigate(`/viewer/match/${match._id}`)}
+        onClick={() => navigate(`/viewer/match/live/${match._id}`)}
       >
         <PlayCircle size={20} />
         Watch Live

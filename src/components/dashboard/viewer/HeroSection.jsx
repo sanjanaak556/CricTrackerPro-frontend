@@ -2,8 +2,10 @@ import React from "react";
 import Lottie from "lottie-react";
 import viewerHero from "../../../assets/lottie/Cricket Ball.json";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 const HeroSection = () => {
+  const navigate = useNavigate();
   return (
     <div className="relative w-full h-[320px] md:h-[420px] rounded-2xl overflow-hidden bg-gray-200 dark:bg-gray-900 shadow-xl">
 
@@ -45,11 +47,16 @@ const HeroSection = () => {
           transition={{ duration: 1 }}
           className="mt-6 flex gap-4"
         >
-          <button className="px-6 py-2.5 bg-blue-600 text-white font-semibold rounded-xl shadow hover:bg-blue-700 backdrop-blur-sm">
+          <button
+            onClick={() => navigate("/viewer/all-matches", { state: { filter: "live" } })}
+            className="px-6 py-2.5 bg-blue-600 text-white font-semibold rounded-xl shadow hover:bg-blue-700 backdrop-blur-sm"
+          >
             Watch Live Matches
           </button>
 
-          <button className="px-6 py-2.5 bg-white/90 text-black font-semibold rounded-xl shadow hover:bg-white">
+          <button
+            onClick={() => navigate("/viewer/leaderboard")}
+            className="px-6 py-2.5 bg-white/90 text-black font-semibold rounded-xl shadow hover:bg-white">
             View Leaderboard
           </button>
         </motion.div>
