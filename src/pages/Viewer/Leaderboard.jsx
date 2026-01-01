@@ -1,66 +1,77 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import LeaderboardTable from "../../components/dashboard/viewer/LeaderboardTable";
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
+import api from "../../services/api";
 
 const Leaderboard = () => {
   const tabs = ["Teams", "Batters", "Bowlers"];
   const [activeTab, setActiveTab] = useState("Teams");
+  const [teamRankings, setTeamRankings] = useState([]);
+  const [batterRankings, setBatterRankings] = useState([]);
+  const [bowlerRankings, setBowlerRankings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Dummy data for now — backend integration later
-  const teamRankings = [
-    { rank: 1, name: "Super Strikers", matches: 12, wins: 10, points: 20 },
-    { rank: 2, name: "Royal Warriors", matches: 12, wins: 8, points: 16 },
-    { rank: 3, name: "Thunder Hawks", matches: 12, wins: 7, points: 14 },
-  ];
+  useEffect(() => {
+    const fetchLeaderboardData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
 
-  const batterRankings = [
-    {
-      rank: 1,
-      name: "Rahul Kumar",
-      team: "Super Strikers",
-      runs: 563,
-      avg: 48.2,
-    },
-    {
-      rank: 2,
-      name: "Sam Peter",
-      team: "Royal Warriors",
-      runs: 510,
-      avg: 45.6,
-    },
-    {
-      rank: 3,
-      name: "Akash Verma",
-      team: "Thunder Hawks",
-      runs: 488,
-      avg: 42.3,
-    },
-  ];
+        const [teamsRes, battersRes, bowlersRes] = await Promise.all([
+          api.get("/viewer/leaderboard/teams"),
+          api.get("/viewer/leaderboard/batters"),
+          api.get("/viewer/leaderboard/bowlers"),
+        ]);
 
-  const bowlerRankings = [
-    {
-      rank: 1,
-      name: "Vikram Singh",
-      team: "Super Strikers",
-      wickets: 24,
-      eco: 6.2,
-    },
-    {
-      rank: 2,
-      name: "John Mathews",
-      team: "Royal Warriors",
-      wickets: 21,
-      eco: 6.8,
-    },
-    {
-      rank: 3,
-      name: "Sahil Khan",
-      team: "Thunder Hawks",
-      wickets: 19,
-      eco: 7.1,
-    },
-  ];
+        setTeamRankings(teamsRes);
+        setBatterRankings(battersRes);
+        setBowlerRankings(bowlersRes);
+      } catch (err) {
+        console.error("Error fetching leaderboard data:", err);
+        setError("Failed to load leaderboard data. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLeaderboardData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="p-4 md:p-6 space-y-6">
+        <Link
+          to="/viewer/dashboard"
+          className="inline-flex items-center text-blue-600 hover:text-blue-400"
+        >
+          <ArrowLeft className="w-5 h-5 mr-1" /> Back to Dashboard
+        </Link>
+        <h1 className="text-3xl font-bold dark:text-white">Leaderboard</h1>
+        <div className="flex justify-center items-center h-64">
+          <div className="text-lg dark:text-white">Loading leaderboard data...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-4 md:p-6 space-y-6">
+        <Link
+          to="/viewer/dashboard"
+          className="inline-flex items-center text-blue-600 hover:text-blue-400"
+        >
+          <ArrowLeft className="w-5 h-5 mr-1" /> Back to Dashboard
+        </Link>
+        <h1 className="text-3xl font-bold dark:text-white">Leaderboard</h1>
+        <div className="flex justify-center items-center h-64">
+          <div className="text-lg text-red-600 dark:text-red-400">{error}</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 md:p-6 space-y-6">
@@ -80,8 +91,8 @@ const Leaderboard = () => {
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={`
-              px-4 py-2 rounded-lg border 
-              dark:border-gray-700 dark:text-white 
+              px-4 py-2 rounded-lg border
+              dark:border-gray-700 dark:text-white
               transition
               ${
                 activeTab === tab

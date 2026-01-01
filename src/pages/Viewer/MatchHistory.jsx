@@ -1,51 +1,59 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Clock, CalendarDays, ChevronRight, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
+import api from "../../services/api";
 
 export default function MatchHistory() {
+  const [matches, setMatches] = useState([]);
   const [filter, setFilter] = useState("all");
+  const [loading, setLoading] = useState(true);
 
   const filters = [
     { key: "all", label: "All" },
-    { key: "won", label: "Won" },
-    { key: "lost", label: "Lost" },
-    { key: "tied", label: "Tied" },
-    { key: "abandoned", label: "Abandoned" }
+    { key: "completed", label: "Completed" },
+    { key: "abandoned", label: "Abandoned" },
   ];
 
-  const matches = [
-    {
-      id: 1,
-      teamA: "Team Alpha",
-      teamB: "Team Beta",
-      result: "Team Alpha won by 20 runs",
-      date: "2025-02-10",
-      time: "4:00 PM",
-      status: "won",
-    },
-    {
-      id: 2,
-      teamA: "Team Titans",
-      teamB: "Team Warriors",
-      result: "Match tied",
-      date: "2025-02-11",
-      time: "6:00 PM",
-      status: "tied",
-    },
-  ];
+  /* -----------------------------
+      FETCH MATCH HISTORY
+  ----------------------------- */
+  useEffect(() => {
+    const fetchMatches = async () => {
+      try {
+        const res = await api.get("/matches");
+        setMatches(res);
+      } catch (err) {
+        console.error("Failed to fetch match history", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMatches();
+  }, []);
 
   const filteredMatches =
-    filter === "all" ? matches : matches.filter((m) => m.status === filter);
+    filter === "all"
+      ? matches
+      : matches.filter((m) => m.status === filter);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin h-10 w-10 border-b-2 border-blue-600 rounded-full" />
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6 text-white">
-    {/* Back */}
-              <Link
-                to="/viewer/dashboard"
-                className="inline-flex items-center text-blue-600 hover:text-blue-400"
-              >
-                <ArrowLeft className="w-5 h-5 mr-1" /> Back to Dashboard
-              </Link>
+      {/* Back */}
+      <Link
+        to="/viewer/dashboard"
+        className="inline-flex items-center text-blue-600 hover:text-blue-400"
+      >
+        <ArrowLeft className="w-5 h-5 mr-1" /> Back to Dashboard
+      </Link>
       <h1 className="text-3xl font-bold">Match History</h1>
 
       {/* Filters */}
@@ -55,7 +63,9 @@ export default function MatchHistory() {
             key={f.key}
             onClick={() => setFilter(f.key)}
             className={`px-4 py-2 rounded-xl border transition ${
-              filter === f.key ? "bg-white text-black border-white" : "border-gray-500"
+              filter === f.key
+                ? "bg-white text-black border-white"
+                : "border-gray-500"
             }`}
           >
             {f.label}
@@ -67,19 +77,32 @@ export default function MatchHistory() {
       <div className="grid md:grid-cols-2 gap-6">
         {filteredMatches.map((match) => (
           <div
-            key={match.id}
-            className="p-5 rounded-2xl bg-gradient-to-br from-gray-800 to-gray-900 shadow-xl border border-gray-700 hover:scale-[1.02] transition"
+            key={match._id}
+            onClick={() =>
+              match.status !== "abandoned" &&
+              (window.location.href = `/match-summary/${match._id}`)
+            }
+            className="cursor-pointer p-5 rounded-2xl bg-gradient-to-br from-gray-800 to-gray-900 shadow-xl border border-gray-700 hover:scale-[1.02] transition"
           >
             <div className="flex justify-between items-center mb-3">
-              <h2 className="text-xl font-semibold">{match.teamA} vs {match.teamB}</h2>
+              <h2 className="text-xl font-semibold">
+                {match.teamA?.name} vs {match.teamB?.name}
+              </h2>
               <ChevronRight />
             </div>
 
-            <p className="text-gray-300">{match.result}</p>
+            <p className="text-gray-300">
+              {match.result || "Result not available"}
+            </p>
 
             <div className="flex items-center gap-3 mt-3 text-gray-400">
-              <CalendarDays className="w-4 h-4" /> {match.date}
-              <Clock className="w-4 h-4 ml-4" /> {match.time}
+              <CalendarDays className="w-4 h-4" />
+              {new Date(match.scheduledAt).toDateString()}
+              <Clock className="w-4 h-4 ml-4" />
+              {new Date(match.scheduledAt).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
             </div>
           </div>
         ))}
