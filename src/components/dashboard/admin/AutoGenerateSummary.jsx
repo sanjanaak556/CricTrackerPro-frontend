@@ -64,9 +64,9 @@ export default function AutoGenerateSummary({ onClose, onCreated }) {
                 className="mt-1 w-full px-3 py-2 rounded-lg bg-base-100 dark:bg-base-200 text-gray-900 dark:text-white outline-none"
                 required
               >
-                <option className="bg-base-100 dark:bg-base-200 text-gray-900 dark:text-white" value="">Choose a match...</option>
+                <option className="bg-white dark:bg-gray-700 text-gray-900 dark:text-white" value="">Choose a match...</option>
                 {matches.map((match) => (
-                  <option className="bg-base-100 dark:bg-base-200 text-gray-900 dark:text-white" key={match._id} value={match._id}>
+                  <option className="bg-white dark:bg-gray-700 text-gray-900 dark:text-white" key={match._id} value={match._id}>
                     {match.matchName} - {match.teamA?.name} vs {match.teamB?.name}
                   </option>
                 ))}
