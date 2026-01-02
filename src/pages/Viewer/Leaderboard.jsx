@@ -94,10 +94,9 @@ const Leaderboard = () => {
               px-4 py-2 rounded-lg border
               dark:border-gray-700 dark:text-white
               transition
-              ${
-                activeTab === tab
-                  ? "bg-blue-600 text-white border-blue-600"
-                  : "hover:bg-blue-600 hover:text-white"
+              ${activeTab === tab
+                ? "bg-blue-600 text-white border-blue-600"
+                : "hover:bg-blue-600 hover:text-white"
               }
             `}
           >

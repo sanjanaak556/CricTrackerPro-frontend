@@ -66,10 +66,10 @@ const FeaturesSection = () => {
               className="group relative"
             >
               <div className="absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl blur-xl"
-                   style={{
-                     background: `linear-gradient(135deg, var(--tw-gradient-stops))`,
-                     backgroundImage: `linear-gradient(135deg, ${feature.color.replace('from-', '').replace('to-', '').split(' ')[0]}, ${feature.color.replace('from-', '').replace('to-', '').split(' ')[1]})`
-                   }}
+                style={{
+                  background: `linear-gradient(135deg, var(--tw-gradient-stops))`,
+                  backgroundImage: `linear-gradient(135deg, ${feature.color.replace('from-', '').replace('to-', '').split(' ')[0]}, ${feature.color.replace('from-', '').replace('to-', '').split(' ')[1]})`
+                }}
               />
               <div className="relative bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 dark:border-gray-700 group-hover:-translate-y-2">
                 <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-6 bg-gradient-to-br ${feature.color} text-white text-2xl shadow-lg`}>

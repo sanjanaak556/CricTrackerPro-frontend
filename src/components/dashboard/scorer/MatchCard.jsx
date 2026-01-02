@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import TossWinnerModal from "./TossWinnerModal"; 
+import TossWinnerModal from "./TossWinnerModal";
 
 export default function MatchCard({ match, onMatchUpdate }) {
   const navigate = useNavigate();
@@ -93,7 +93,7 @@ export default function MatchCard({ match, onMatchUpdate }) {
         electedTo: updatedData.electedTo
       });
     }
-    
+
     // Show success message
     setTimeout(() => {
       alert("✅ Toss recorded! Match is now LIVE. You can start scoring.");

@@ -134,11 +134,10 @@ export default function DashboardSidebar({ sidebarOpen, setSidebarOpen }) {
                 `
       flex items-center gap-4 px-6 py-3 my-1
       transition-all duration-200 cursor-pointer
-      ${
-        isActive
-          ? "bg-blue-500 text-white dark:bg-blue-600 rounded-l-xl"
-          : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-      }
+      ${isActive
+                  ? "bg-blue-500 text-white dark:bg-blue-600 rounded-l-xl"
+                  : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                }
     `
               }
               onClick={() => {

@@ -50,7 +50,6 @@ export default function Reports() {
   const updateReport = async (matchId, data) => {
     try {
       setLoading(true);
-      // Note: your update controller updates by matchId (not summary _id)
       await api.put(`/match-summary/${matchId}`, data);
       setShowEditModal(false);
       setEditingReport(null);
@@ -65,8 +64,6 @@ export default function Reports() {
     if (!window.confirm("Delete this report? This cannot be undone.")) return;
     try {
       setLoading(true);
-      // Backend: I didn't see a DELETE route in your provided routes.
-      // If you already have one, this will work. Otherwise add a DELETE /match-summary/:id route.
       await api.delete(`/match-summary/${summaryId}`);
       await fetchReports();
     } catch (err) {
@@ -155,7 +152,6 @@ export default function Reports() {
             setShowEditModal(false);
             setEditingReport(null);
           }}
-          // NOTE: updateReport expects a matchId (your controller updates by matchId). If your summary doc id is needed, adapt backend.
           onSubmit={(payload) => updateReport(editingReport.matchId || editingReport.match?._id || editingReport._id, payload)}
           initialData={editingReport}
         />

@@ -154,8 +154,8 @@ const TestimonialsSection = () => {
                                                 <Star
                                                     key={i}
                                                     className={`w-5 h-5 ${i < testimonial.rating
-                                                            ? 'fill-yellow-400 text-yellow-400'
-                                                            : 'fill-gray-200 text-gray-200 dark:fill-gray-700 dark:text-gray-700'
+                                                        ? 'fill-yellow-400 text-yellow-400'
+                                                        : 'fill-gray-200 text-gray-200 dark:fill-gray-700 dark:text-gray-700'
                                                         }`}
                                                 />
                                             ))}
@@ -200,8 +200,8 @@ const TestimonialsSection = () => {
                                 setIsAutoPlaying(false);
                             }}
                             className={`w-3 h-3 rounded-full transition-all duration-300 ${index === currentSlide
-                                    ? 'bg-blue-600 dark:bg-blue-400 w-8'
-                                    : 'bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600'
+                                ? 'bg-blue-600 dark:bg-blue-400 w-8'
+                                : 'bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600'
                                 }`}
                         />
                     ))}

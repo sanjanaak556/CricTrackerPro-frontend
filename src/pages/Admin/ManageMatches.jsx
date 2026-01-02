@@ -35,14 +35,14 @@ function ManageMatches() {
         api.get("/teams"),
         api.get("/users"),
       ]);
-      
+
       setMatches(matchesRes || []);
-      setTeams(Array.isArray(teamsRes) ? teamsRes : 
-               teamsRes?.teams ? teamsRes.teams : 
-               teamsRes?.data ? teamsRes.data : []);
-      setUsers(Array.isArray(usersRes) ? usersRes : 
-               usersRes?.users ? usersRes.users : 
-               usersRes?.data ? usersRes.data : []);
+      setTeams(Array.isArray(teamsRes) ? teamsRes :
+        teamsRes?.teams ? teamsRes.teams :
+          teamsRes?.data ? teamsRes.data : []);
+      setUsers(Array.isArray(usersRes) ? usersRes :
+        usersRes?.users ? usersRes.users :
+          usersRes?.data ? usersRes.data : []);
       setLoading(false);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -53,9 +53,9 @@ function ManageMatches() {
   const fetchMatches = async () => {
     try {
       const response = await api.get(`/matches?status=${filter}`);
-      setMatches(Array.isArray(response) ? response : 
-                 response?.matches ? response.matches : 
-                 response?.data ? response.data : []);
+      setMatches(Array.isArray(response) ? response :
+        response?.matches ? response.matches :
+          response?.data ? response.data : []);
     } catch (error) {
       console.error("Error fetching matches:", error);
     }
@@ -131,9 +131,9 @@ function ManageMatches() {
 
   if (loading) {
     return (
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-        </div>
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
     );
   }
 
@@ -165,11 +165,10 @@ function ManageMatches() {
           <button
             key={status}
             onClick={() => setFilter(status)}
-            className={`px-4 py-2 rounded-lg capitalize ${
-              filter === status
+            className={`px-4 py-2 rounded-lg capitalize ${filter === status
                 ? "bg-blue-600 text-white"
                 : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
-            }`}
+              }`}
           >
             {status}
           </button>
@@ -229,47 +228,47 @@ function ManageMatches() {
 export default ManageMatches;
 
 // Match Card Component
-function MatchCard({ 
-  match, 
-  onEdit, 
-  onDelete, 
-  onEndMatch, 
-  onViewLive, 
+function MatchCard({
+  match,
+  onEdit,
+  onDelete,
+  onEndMatch,
+  onViewLive,
   onViewSummary,
-  getStatusColor 
+  getStatusColor
 }) {
   const navigate = useNavigate();
 
   // Helper function to get toss winner name
   const getTossWinnerName = () => {
     if (!match.tossWinner) return null;
-    
+
     // If tossWinner is an object with name property (populated)
     if (typeof match.tossWinner === 'object' && match.tossWinner.name) {
       return match.tossWinner.name;
     }
-    
+
     // If tossWinner is just an ID string, try to match with teamA or teamB
     const tossWinnerId = match.tossWinner.toString ? match.tossWinner.toString() : match.tossWinner;
     const teamAId = match.teamA?._id?.toString();
     const teamBId = match.teamB?._id?.toString();
-    
+
     if (tossWinnerId === teamAId) {
       return match.teamA?.name || "Team A";
     }
     if (tossWinnerId === teamBId) {
       return match.teamB?.name || "Team B";
     }
-    
+
     // Fallback: check if team objects have _id property
     if (match.teamA && match.teamA._id && tossWinnerId === match.teamA._id.toString()) {
       return match.teamA.name;
     }
-    
+
     if (match.teamB && match.teamB._id && tossWinnerId === match.teamB._id.toString()) {
       return match.teamB.name;
     }
-    
+
     return "Unknown Team";
   };
 

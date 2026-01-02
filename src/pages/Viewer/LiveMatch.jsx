@@ -45,7 +45,7 @@ const LiveMatch = () => {
   const [matchEvent, setMatchEvent] = useState(null);
   const [lastBallId, setLastBallId] = useState(null); // 🔧 FIX: prevent repeat animation
 
-  // 🔗 Socket connection status
+  // Socket connection status
   const [isSocketConnected, setIsSocketConnected] = useState(getConnectionStatus());
   const [pollingInterval, setPollingInterval] = useState(null);
 
@@ -68,7 +68,7 @@ const LiveMatch = () => {
       if (current?._id) {
         // Fetch recent balls from all overs
         const oversRes = await api.get(`/overs/innings/${current._id}`);
-        const allBalls = oversRes.overs?.flatMap(over => 
+        const allBalls = oversRes.overs?.flatMap(over =>
           (over.balls || []).map(ball => ({
             ...ball,
             overNumber: over.overNumber,
@@ -76,9 +76,9 @@ const LiveMatch = () => {
             ballNumber: ball.ballNumber
           }))
         ) || [];
-        
+
         // Get last 10 balls, most recent first
-        const sortedBalls = allBalls.sort((a, b) => 
+        const sortedBalls = allBalls.sort((a, b) =>
           new Date(b.createdAt || b.timestamp) - new Date(a.createdAt || a.timestamp)
         );
         setRecentBalls(sortedBalls.slice(0, 10));
@@ -110,7 +110,7 @@ const LiveMatch = () => {
     // Listen for innings complete events
     socket.on("inningsComplete", (data) => {
       console.log("🏏 Innings complete event received:", data);
-      // Target is now handled server-side and persisted in database
+      // Target handled server-side and persisted in database
     });
 
     // Listen for live score updates
@@ -180,7 +180,7 @@ const LiveMatch = () => {
     // Listen for ball removed events (for undo)
     socket.on("ballRemoved", (data) => {
       const { ballId } = data;
-      
+
       // Remove the undone ball from recent balls
       setRecentBalls(prev => prev.filter(ball => ball._id !== ballId));
     });
@@ -213,7 +213,7 @@ const LiveMatch = () => {
 
     const latestBall = recentBalls[0]; // Most recent ball is first in array
 
-    // 🔧 FIX: avoid animation on polling refresh
+    //  avoid animation on polling refresh
     if (latestBall._id === lastBallId) return;
 
     setLastBallId(latestBall._id);
@@ -225,9 +225,9 @@ const LiveMatch = () => {
     if (latestBall.isWicket || latestBall.runs === 4 || latestBall.runs === 6) {
       setTimeout(() => setMatchEvent(null), 1800);
     }
-  }, [recentBalls]); // 👈 correct dependency
+  }, [recentBalls]);
 
-  /* 🔗 CONNECTION MONITORING & FALLBACK POLLING */
+  /* CONNECTION MONITORING & FALLBACK POLLING */
   useEffect(() => {
     // Set up connection listener
     cleanupConnectionListener = addConnectionListener((connected) => {
@@ -289,13 +289,13 @@ const LiveMatch = () => {
   // Calculate target display for second innings - USING SCORING PAGE LOGIC
   const targetDisplay = match.target && activeInnings?.inningsNumber === 2
     ? (() => {
-        const runsNeeded = Math.max(0, match.target - (match.currentScore?.runs || 0));
-        const totalBalls = totalOvers * 6;
-        const oversDecimal = match.currentScore?.overs || 0;
-        const ballsBowled = Math.floor(oversDecimal) * 6 + Math.round((oversDecimal % 1) * 10);
-        const ballsRemaining = Math.max(0, totalBalls - ballsBowled);
-        return runsNeeded > 0 ? `Need ${runsNeeded} runs from ${ballsRemaining} balls` : null;
-      })()
+      const runsNeeded = Math.max(0, match.target - (match.currentScore?.runs || 0));
+      const totalBalls = totalOvers * 6;
+      const oversDecimal = match.currentScore?.overs || 0;
+      const ballsBowled = Math.floor(oversDecimal) * 6 + Math.round((oversDecimal % 1) * 10);
+      const ballsRemaining = Math.max(0, totalBalls - ballsBowled);
+      return runsNeeded > 0 ? `Need ${runsNeeded} runs from ${ballsRemaining} balls` : null;
+    })()
     : null;
 
   /* -------------------- UI -------------------- */
@@ -319,17 +319,14 @@ const LiveMatch = () => {
             <h2 className="text-xl font-bold">{match.teamA?.name}</h2>
           </div>
 
-          <span className={`relative px-3 py-1 text-xs font-bold border rounded-full ${
-            isSocketConnected
+          <span className={`relative px-3 py-1 text-xs font-bold border rounded-full ${isSocketConnected
               ? 'text-green-600 border-green-500 bg-green-500/20'
               : 'text-orange-600 border-orange-500 bg-orange-500/20'
-          }`}>
-            <span className={`absolute left-2 h-2 w-2 rounded-full ${
-              isSocketConnected ? 'bg-green-600 animate-ping' : 'bg-orange-600'
-            }`}></span>
-            <span className={`absolute left-2 h-2 w-2 rounded-full ${
-              isSocketConnected ? 'bg-green-600' : 'bg-orange-600'
-            }`}></span>
+            }`}>
+            <span className={`absolute left-2 h-2 w-2 rounded-full ${isSocketConnected ? 'bg-green-600 animate-ping' : 'bg-orange-600'
+              }`}></span>
+            <span className={`absolute left-2 h-2 w-2 rounded-full ${isSocketConnected ? 'bg-green-600' : 'bg-orange-600'
+              }`}></span>
             <span className="ml-4">
               {isSocketConnected ? 'LIVE' : 'POLLING'}
             </span>
@@ -436,7 +433,7 @@ const LiveMatch = () => {
         </div>
       </div>
 
-      {/* ================= PLAYERS ================= */}
+      {/* ---- PLAYERS ---- */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {players &&
           [players.teamA, players.teamB].map((team, index) => (
@@ -493,7 +490,7 @@ const LiveMatch = () => {
           ))}
       </div>
 
-      {/* ================= BATTER & BOWLER ================= */}
+      {/* ---- BATTER & BOWLER ---- */}
       {activeInnings && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {/* STRIKER */}
@@ -577,7 +574,7 @@ const LiveMatch = () => {
         </div>
       )}
 
-      {/* ================= RECENT BALLS ================= */}
+      {/* ---- RECENT BALLS ---- */}
       <div className="bg-white dark:bg-gray-900 p-4 rounded-xl border dark:border-gray-700">
         <h3 className="font-semibold mb-3">Recent Balls (Last 10)</h3>
         {recentBalls.length === 0 ? (
@@ -598,7 +595,7 @@ const LiveMatch = () => {
         )}
       </div>
 
-      {/* ================= COMMENTARY ================= */}
+      {/* ---- COMMENTARY ---- */}
       <div className="bg-white dark:bg-gray-900 p-4 rounded-xl border dark:border-gray-700">
         <h3 className="font-semibold mb-3">Live Commentary</h3>
         <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2">

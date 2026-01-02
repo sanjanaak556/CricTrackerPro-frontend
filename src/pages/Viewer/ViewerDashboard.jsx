@@ -20,9 +20,7 @@ const ViewerDashboard = () => {
 
   const [error, setError] = useState("");
 
-  // ---------------------------------------------------------
   // 1) FETCH DASHBOARD HIGHLIGHTS
-  // ---------------------------------------------------------
   useEffect(() => {
     const loadDashboard = async () => {
       try {
@@ -40,9 +38,7 @@ const ViewerDashboard = () => {
     loadDashboard();
   }, []);
 
-  // ---------------------------------------------------------
-  // 2) FETCH DASHBOARD STATS (NEW)
-  // ---------------------------------------------------------
+  // 2) FETCH DASHBOARD STATS 
   useEffect(() => {
     const loadDashboardStats = async () => {
       try {
@@ -60,9 +56,7 @@ const ViewerDashboard = () => {
     loadDashboardStats();
   }, []);
 
-  // ---------------------------------------------------------
   // 3) FETCH LIVE MATCHES
-  // ---------------------------------------------------------
   useEffect(() => {
     const loadLiveMatches = async () => {
       try {
@@ -80,9 +74,7 @@ const ViewerDashboard = () => {
     loadLiveMatches();
   }, []);
 
-  // ---------------------------------------------------------
   // 4) FETCH FOLLOWED TEAMS ACTIVITY
-  // ---------------------------------------------------------
   useEffect(() => {
     const fetchFollowedTeamsActivity = async () => {
       try {
@@ -199,7 +191,7 @@ const ViewerDashboard = () => {
         )}
       </div>
 
-      {/* ⭐ Followed Teams Activity (Styled + Lucide Icons) */}
+      {/*  Followed Teams Activity */}
       <div className="mt-10">
         <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
           <Bell className="w-6 h-6 text-yellow-400" />
@@ -287,19 +279,18 @@ const ViewerDashboard = () => {
               {/* Status Badge */}
               <div
                 className={`mt-4 inline-block px-3 py-1 rounded-full text-xs font-medium 
-    ${
-      item.status === "live"
-        ? "bg-red-500/20 text-red-300 border border-red-500/40 animate-pulse"
-        : item.status === "upcoming"
-        ? "bg-blue-500/20 text-blue-300 border border-blue-500/40"
-        : "bg-green-500/20 text-green-300 border border-green-500/40"
-    }`}
+    ${item.status === "live"
+                    ? "bg-red-500/20 text-red-300 border border-red-500/40 animate-pulse"
+                    : item.status === "upcoming"
+                      ? "bg-blue-500/20 text-blue-300 border border-blue-500/40"
+                      : "bg-green-500/20 text-green-300 border border-green-500/40"
+                  }`}
               >
                 {item.status === "live"
                   ? "LIVE NOW"
                   : item.status === "upcoming"
-                  ? "Upcoming Match"
-                  : "Recently Played"}
+                    ? "Upcoming Match"
+                    : "Recently Played"}
               </div>
             </div>
           ))}

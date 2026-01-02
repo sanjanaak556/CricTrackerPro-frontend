@@ -21,11 +21,10 @@ const UserTable = ({ users, onEdit, onDelete }) => {
           </div>
         </div>
         <span
-          className={`px-2 py-1 text-xs rounded ${
-            user.isActive
-              ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
-              : "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300"
-          }`}
+          className={`px-2 py-1 text-xs rounded ${user.isActive
+            ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
+            : "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300"
+            }`}
         >
           {user.isActive ? "Active" : "Inactive"}
         </span>
@@ -120,11 +119,10 @@ const UserTable = ({ users, onEdit, onDelete }) => {
 
                 <td className="p-3">
                   <span
-                    className={`px-2 py-1 text-sm rounded ${
-                      u.isActive
-                        ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
-                        : "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300"
-                    }`}
+                    className={`px-2 py-1 text-sm rounded ${u.isActive
+                      ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
+                      : "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300"
+                      }`}
                   >
                     {u.isActive ? "Active" : "Inactive"}
                   </span>

@@ -4,9 +4,7 @@ export default function BallControls({ onSubmitBall, onWicketSelect, disabled = 
   const [showExtras, setShowExtras] = useState(false);
   const [showWicketTypes, setShowWicketTypes] = useState(false);
 
-  /* ======================================================
-     GUARD
-  ====================================================== */
+  //  GUARD
   const safeSubmit = (payload) => {
     if (disabled) return;
     onSubmitBall(payload);
@@ -14,9 +12,7 @@ export default function BallControls({ onSubmitBall, onWicketSelect, disabled = 
     setShowWicketTypes(false);
   };
 
-  /* ======================================================
-     RUNS
-  ====================================================== */
+  //  RUNS
   const submitRuns = (runs) => {
     safeSubmit({
       type: "RUN",
@@ -24,9 +20,7 @@ export default function BallControls({ onSubmitBall, onWicketSelect, disabled = 
     });
   };
 
-  /* ======================================================
-     EXTRAS
-  ====================================================== */
+  //  EXTRAS
   const submitExtra = (extraType) => {
     safeSubmit({
       type: "EXTRA",
@@ -34,9 +28,7 @@ export default function BallControls({ onSubmitBall, onWicketSelect, disabled = 
     });
   };
 
-  /* ======================================================
-     WICKET
-  ====================================================== */
+  //  WICKET
   const submitWicket = (wicketType) => {
     safeSubmit({
       type: "WICKET",
@@ -44,9 +36,7 @@ export default function BallControls({ onSubmitBall, onWicketSelect, disabled = 
     });
   };
 
-  /* ======================================================
-     STYLES
-  ====================================================== */
+  //  STYLES
   const baseBtn =
     "py-2 rounded font-semibold transition disabled:opacity-40 disabled:cursor-not-allowed";
 

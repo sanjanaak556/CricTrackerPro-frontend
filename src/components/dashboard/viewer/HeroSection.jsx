@@ -48,7 +48,7 @@ const HeroSection = () => {
           className="mt-6 flex gap-4"
         >
           <button
-            onClick={() => navigate("/viewer/all-matches", { state: { filter: "live" } })}
+            onClick={() => navigate("/viewer/all-matches", { state: { filters: "LIVE" } })}
             className="px-6 py-2.5 bg-blue-600 text-white font-semibold rounded-xl shadow hover:bg-blue-700 backdrop-blur-sm"
           >
             Watch Live Matches

@@ -27,10 +27,9 @@ export default function RecentMatchesTable({ matches = [] }) {
                 <span
                   className={`
                     px-2 py-1 rounded text-sm
-                    ${
-                      m.status === "completed"
-                        ? "bg-green-200 text-green-700"
-                        : m.status === "live"
+                    ${m.status === "completed"
+                      ? "bg-green-200 text-green-700"
+                      : m.status === "live"
                         ? "bg-blue-200 text-blue-700"
                         : "bg-gray-300 text-gray-800"
                     }

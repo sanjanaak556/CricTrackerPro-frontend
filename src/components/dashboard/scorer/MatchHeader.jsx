@@ -77,10 +77,9 @@ export default function MatchHeader({ match }) {
 
         <span
           className={`px-3 py-1 rounded text-xs font-semibold
-            ${
-              match.status === "live"
-                ? "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300"
-                : match.status === "completed"
+            ${match.status === "live"
+              ? "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300"
+              : match.status === "completed"
                 ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
                 : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300"
             }

@@ -83,7 +83,7 @@ function App() {
       <Route path="/logout" element={<Logout />} />
 
 
-      {/* ADMIN */}
+      {/* ---------- ADMIN ---------- */}
       <Route
         path="/admin/dashboard"
         element={
@@ -184,7 +184,7 @@ function App() {
       />
 
 
-      {/* SCORER */}
+      {/* ---------- SCORER ---------- */}
       <Route
         path="/scorer/dashboard"
         element={
@@ -275,7 +275,7 @@ function App() {
       />
 
 
-      {/* VIEWER */}
+      {/* ---------- VIEWER ---------- */}
       <Route
         path="/viewer/dashboard"
         element={

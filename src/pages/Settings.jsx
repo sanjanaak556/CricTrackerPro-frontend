@@ -25,9 +25,7 @@ const Settings = () => {
     document.documentElement.classList.contains("dark")
   );
 
-  // ---------------------------------------------------------
   // FETCH CURRENT USER
-  // ---------------------------------------------------------
   useEffect(() => {
     const loadProfile = async () => {
       try {
@@ -48,18 +46,14 @@ const Settings = () => {
     loadProfile();
   }, []);
 
-  // ---------------------------------------------------------
   // SELECT NEW IMAGE
-  // ---------------------------------------------------------
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     setNewImageFile(file);
     setPreviewImage(URL.createObjectURL(file));
   };
 
-  // ---------------------------------------------------------
   // UPDATE PROFILE (COMMON ENDPOINT FOR ALL ROLES)
-  // ---------------------------------------------------------
   const handleProfileUpdate = async () => {
     try {
       const formData = new FormData();
@@ -70,7 +64,7 @@ const Settings = () => {
         formData.append("image", newImageFile);
       }
 
-      // ⭐ FIXED: single endpoint for Admin, Scorer, Viewer
+      // single endpoint for Admin, Scorer, Viewer
       await api.put("/users/me", formData);
 
       alert("Profile updated successfully!");
@@ -80,9 +74,7 @@ const Settings = () => {
     }
   };
 
-  // ---------------------------------------------------------
   // REMOVE PROFILE IMAGE
-  // ---------------------------------------------------------
   const handleRemoveImage = async () => {
     try {
       await api.delete("/users/me/image");
@@ -94,9 +86,7 @@ const Settings = () => {
     }
   };
 
-  // ---------------------------------------------------------
   // DELETE ACCOUNT
-  // ---------------------------------------------------------
   const handleDeleteAccount = async () => {
     try {
       await api.delete("/users/me");
@@ -108,9 +98,7 @@ const Settings = () => {
     }
   };
 
-  // ---------------------------------------------------------
   // UPDATE PASSWORD
-  // ---------------------------------------------------------
   const handlePasswordUpdate = async () => {
     try {
       if (!oldPassword || !newPassword) return alert("Please fill both fields");
@@ -128,9 +116,7 @@ const Settings = () => {
     }
   };
 
-  // ---------------------------------------------------------
   // THEME TOGGLE
-  // ---------------------------------------------------------
   const toggleTheme = () => {
     const root = document.documentElement;
     root.classList.toggle("dark");
@@ -138,15 +124,13 @@ const Settings = () => {
     localStorage.setItem("theme", !isDark ? "dark" : "light");
   };
 
-  // ---------------------------------------------------------
   // DASHBOARD ROUTE BASED ON USER ROLE
-  // ---------------------------------------------------------
   const dashboardRoute =
     profile.role === "admin"
       ? "/admin/dashboard"
       : profile.role === "scorer"
-      ? "/scorer/dashboard"
-      : "/viewer/dashboard";
+        ? "/scorer/dashboard"
+        : "/viewer/dashboard";
 
   return (
     <div className="p-4 sm:p-8 space-y-6">
@@ -166,11 +150,10 @@ const Settings = () => {
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 rounded-md text-sm capitalize ${
-              activeTab === tab
-                ? "bg-white dark:bg-gray-900 shadow font-semibold"
-                : "opacity-70"
-            }`}
+            className={`px-4 py-2 rounded-md text-sm capitalize ${activeTab === tab
+              ? "bg-white dark:bg-gray-900 shadow font-semibold"
+              : "opacity-70"
+              }`}
           >
             {tab}
           </button>

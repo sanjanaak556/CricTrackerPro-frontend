@@ -13,11 +13,11 @@ const AllMatches = () => {
   const fetchMatches = async (filter) => {
     try {
       setLoading(true);
-      console.log("📥 Fetching matches, filter:", filter);
+      console.log("Fetching matches, filter:", filter);
       const res = await api.get(
         `/matches${filter !== "ALL" ? `?status=${filter}` : ""}`
       );
-      console.log("✅ Matches API response:", res);
+      console.log("Matches API response:", res);
       setMatches(Array.isArray(res) ? res : []);
     } catch (err) {
       console.error("Failed to fetch matches", err);

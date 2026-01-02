@@ -8,10 +8,9 @@ const MatchFilters = ({ activeFilter, onChange }) => {
           key={filter}
           onClick={() => onChange(filter)}
           className={`px-4 py-1 rounded-full border transition
-            ${
-              activeFilter === filter
-                ? "bg-blue-600 text-white"
-                : "dark:border-gray-600 dark:text-white hover:bg-blue-600 hover:text-white"
+            ${activeFilter === filter
+              ? "bg-blue-600 text-white"
+              : "dark:border-gray-600 dark:text-white hover:bg-blue-600 hover:text-white"
             }`}
         >
           {filter}

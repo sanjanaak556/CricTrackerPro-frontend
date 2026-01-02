@@ -31,9 +31,7 @@ export default function ScoringPage() {
     const [showEndMatchModal, setShowEndMatchModal] = useState(false);
     const [wicketContext, setWicketContext] = useState(null);
 
-    /* ======================================================
-       INITIAL LOAD
-    ====================================================== */
+    //    --- LOAD MATCH & PLAYERS ---
     useEffect(() => {
         const loadData = async () => {
             try {
@@ -96,7 +94,7 @@ export default function ScoringPage() {
                 setFieldingPlayers(fieldingPlayers);
                 setBattingTeamId(battingTeamId);
                 setBowlingTeamId(fieldingTeamId);
-                
+
                 // Check if innings already started and not completed (and has striker set)
                 console.log("currentInnings:", matchData.currentInnings);
                 console.log("completed:", matchData.currentInnings?.completed);
@@ -106,7 +104,7 @@ export default function ScoringPage() {
                     setInningsStarted(true);
                     setOverStarted(!!matchData.currentInnings.currentOverId);
                 }
-                
+
                 setLoading(false);
             } catch (err) {
                 console.error("❌ Failed to load scoring page", err);
@@ -117,9 +115,7 @@ export default function ScoringPage() {
         loadData();
     }, [matchId, navigate]);
 
-    /* ======================================================
-       UPDATE BATTING/FIELDING PLAYERS WHEN INNINGS CHANGES
-    ====================================================== */
+    //    --- UPDATE PLAYERS WHEN INNINGS CHANGE ---
     useEffect(() => {
         if (!innings || !match || !players.length) return;
 
@@ -135,9 +131,7 @@ export default function ScoringPage() {
         setBowlingTeamId(bowlingTeamId);
     }, [innings, match, players]);
 
-    /* ======================================================
-       SOCKETS
-    ====================================================== */
+    //    --- SOCKET LISTENERS ---
     useEffect(() => {
         if (!matchId) return;
 
@@ -189,9 +183,7 @@ export default function ScoringPage() {
         };
     }, [matchId]);
 
-    /* ======================================================
-       START INNINGS
-    ====================================================== */
+    //   ---- START INNINGS ---
     const startInnings = async ({ striker, nonStriker }) => {
         try {
             await api.post("/scorer/start-innings", {
@@ -220,31 +212,27 @@ export default function ScoringPage() {
         }
     };
 
-    /* ======================================================
-       START OVER
-    ====================================================== */
-  const handleStartOver = async (bowlerId) => {
-  if (!innings?._id) {
-    console.error("❌ Cannot start over: inningsId missing");
-    return;
-  }
+    //    --- START OVER ---
+    const handleStartOver = async (bowlerId) => {
+        if (!innings?._id) {
+            console.error("❌ Cannot start over: inningsId missing");
+            return;
+        }
 
-  try {
-    await api.post(`/scorer/start-over/${matchId}`, {
-      inningsId: innings._id,
-      bowler: bowlerId,
-    });
+        try {
+            await api.post(`/scorer/start-over/${matchId}`, {
+                inningsId: innings._id,
+                bowler: bowlerId,
+            });
 
-    setOverStarted(true);
-    setShowBowlerModal(false);
-  } catch (err) {
-    console.error("❌ Failed to start over", err.response?.data || err);
-  }
-};
+            setOverStarted(true);
+            setShowBowlerModal(false);
+        } catch (err) {
+            console.error("❌ Failed to start over", err.response?.data || err);
+        }
+    };
 
-    /* ======================================================
-       SUBMIT BALL
-    ====================================================== */
+    //    --- SUBMIT BALL ---
     const submitBall = async (ballData) => {
         if (!overStarted) return;
 
@@ -281,16 +269,12 @@ export default function ScoringPage() {
         }
     };
 
-    /* ======================================================
-       HANDLE WICKET SELECT
-    ====================================================== */
+    //   ---- HANDLE WICKET SELECT ----
     const handleWicketSelect = (wicketType) => {
         submitBall({ type: "WICKET", wicketType });
     };
 
-    /* ======================================================
-       CONFIRM NEW BATTER
-    ====================================================== */
+    //   ---- CONFIRM NEW BATTER ----
     const confirmNewBatter = async ({ newBatter, wicketType }) => {
         try {
             await api.post("/scorer/new-batter", {
@@ -306,9 +290,7 @@ export default function ScoringPage() {
         }
     };
 
-    /* ======================================================
-       UNDO LAST BALL
-    ====================================================== */
+    //    ---- UNDO LAST BALL ----
     const undoLastBall = async () => {
         try {
             await api.post(`/scorer/undo/${matchId}`);
@@ -323,9 +305,7 @@ export default function ScoringPage() {
         }
     };
 
-    /* ======================================================
-       END INNINGS
-    ====================================================== */
+    //  ----  END INNINGS  ----
     const endInnings = async () => {
         if (!window.confirm("Are you sure you want to end the current innings?")) {
             return;
@@ -348,9 +328,7 @@ export default function ScoringPage() {
         }
     };
 
-    /* ======================================================
-       HANDLE MATCH END
-    ====================================================== */
+    //  ----  HANDLE MATCH END  ----
     const handleMatchEnd = (status) => {
         // Navigate back to scorer dashboard or match history
         navigate("/scorer/dashboard");
@@ -362,40 +340,40 @@ export default function ScoringPage() {
 
     return (
         <div className="p-4 space-y-4 max-w-5xl mx-auto">
-        {/* MATCH HEADER */}
-        <MatchHeader match={match} />
+            {/* MATCH HEADER */}
+            <MatchHeader match={match} />
 
-        {/* BATTING TEAM INDICATOR */}
-        {innings && (
-            <div className="flex items-center justify-center">
-                <div className="bg-gradient-to-r from-green-600 to-blue-600 text-white px-6 py-3 rounded-lg shadow-md text-center border border-green-400 animate-pulse">
-                    <div className="text-sm font-semibold mb-1">
-                        {innings.inningsNumber === 1 ? "1st Innings" : "2nd Innings"}
-                    </div>
-                    <div className="flex items-center gap-2 text-sm font-semibold">
-                        <span className="text-lg animate-bounce">🏏</span>
-                        <span>Now Batting</span>
-                    </div>
-                    <div className="text-lg font-bold mt-1">
-                        {innings.battingTeam?.name || (innings.battingTeam === match?.teamA?._id ? match.teamA.name : match?.teamB?.name)}
+            {/* BATTING TEAM INDICATOR */}
+            {innings && (
+                <div className="flex items-center justify-center">
+                    <div className="bg-gradient-to-r from-green-600 to-blue-600 text-white px-6 py-3 rounded-lg shadow-md text-center border border-green-400 animate-pulse">
+                        <div className="text-sm font-semibold mb-1">
+                            {innings.inningsNumber === 1 ? "1st Innings" : "2nd Innings"}
+                        </div>
+                        <div className="flex items-center gap-2 text-sm font-semibold">
+                            <span className="text-lg animate-bounce">🏏</span>
+                            <span>Now Batting</span>
+                        </div>
+                        <div className="text-lg font-bold mt-1">
+                            {innings.battingTeam?.name || (innings.battingTeam === match?.teamA?._id ? match.teamA.name : match?.teamB?.name)}
+                        </div>
                     </div>
                 </div>
-            </div>
-        )}
+            )}
 
-        {/* TARGET DISPLAY */}
-        {match?.target && innings?.inningsNumber === 2 && (
-            <div className="flex items-center justify-center">
-                <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-lg shadow-md text-center border border-blue-400">
-                    <div className="text-sm font-semibold mb-1">
-                        Target: {match.target}
+            {/* TARGET DISPLAY */}
+            {match?.target && innings?.inningsNumber === 2 && (
+                <div className="flex items-center justify-center">
+                    <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-lg shadow-md text-center border border-blue-400">
+                        <div className="text-sm font-semibold mb-1">
+                            Target: {match.target}
+                        </div>
                     </div>
                 </div>
-            </div>
-        )}
+            )}
 
-        {/* SCOREBOARD */}
-        <ScoreBoard innings={innings} />
+            {/* SCOREBOARD */}
+            <ScoreBoard innings={innings} />
 
             {/* START INNINGS BUTTON - only show if innings hasn't started */}
             {!inningsStarted && (

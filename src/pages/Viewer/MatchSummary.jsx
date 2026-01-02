@@ -30,7 +30,7 @@ export default function MatchSummary() {
             setSummary(summaryRes);
           })
           .catch((summaryErr) => {
-            // If summary not found (404), just set to null - it's okay for abandoned matches
+            // If summary not found (404), set to null - it's okay for abandoned matches
             if (summaryErr.response?.status === 404) {
               setSummary(null);
             } else {

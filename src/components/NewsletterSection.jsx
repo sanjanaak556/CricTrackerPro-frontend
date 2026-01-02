@@ -5,7 +5,7 @@ const NewsletterSection = () => {
     const [email, setEmail] = useState('');
     const [subscribed, setSubscribed] = useState(false);
     const [loading, setLoading] = useState(false);
-    
+
     // Modal states
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
@@ -79,7 +79,7 @@ const NewsletterSection = () => {
 
             setFeedbackSubmitted(true);
             setFeedbackLoading(false);
-            
+
             // Reset form after 3 seconds
             setTimeout(() => {
                 setFeedbackSubmitted(false);
@@ -109,7 +109,7 @@ const NewsletterSection = () => {
             const subscribers = JSON.parse(localStorage.getItem('cricketSubscribers') || '[]');
             const updatedSubscribers = subscribers.filter(sub => sub.email !== userEmail);
             localStorage.setItem('cricketSubscribers', JSON.stringify(updatedSubscribers));
-            alert(`✅ ${userEmail} has been unsubscribed (demo mode).`);
+            alert(`✅ ${userEmail} has been unsubscribed.`);
         }
     };
 
@@ -293,7 +293,7 @@ const NewsletterSection = () => {
     return (
         <>
             <ContactModal />
-            
+
             <section id="contact" className="py-20 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
                 <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="max-w-3xl mx-auto">
@@ -474,7 +474,7 @@ const NewsletterSection = () => {
                                     Have suggestions, bug reports, or want to partner with us?
                                 </p>
                                 <div className="flex flex-wrap gap-4 justify-center">
-                                    <button 
+                                    <button
                                         onClick={openModal}
                                         className="px-8 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-bold rounded-xl hover:shadow-2xl hover:shadow-blue-500/30 transition-all duration-300 cursor-pointer flex items-center gap-2"
                                     >

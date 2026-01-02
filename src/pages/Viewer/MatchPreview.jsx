@@ -129,13 +129,12 @@ export default function MatchPreview() {
         {/* Status */}
         <div className="flex items-center">
           <span
-            className={`px-3 py-1 rounded-full text-sm font-medium capitalize ${
-              status === "upcoming"
+            className={`px-3 py-1 rounded-full text-sm font-medium capitalize ${status === "upcoming"
                 ? "bg-blue-600 text-white"
                 : status === "postponed"
-                ? "bg-orange-500 text-white"
-                : "bg-gray-500 text-white"
-            }`}
+                  ? "bg-orange-500 text-white"
+                  : "bg-gray-500 text-white"
+              }`}
           >
             {status}
           </span>

@@ -64,7 +64,7 @@ export default function ViewMatchDetails() {
 
     setSubmitting(true);
     setValidationError("");
-    
+
     try {
       const updateData = {
         tossWinner: tossData.tossWinner,
@@ -74,23 +74,23 @@ export default function ViewMatchDetails() {
 
       // Send update request
       const response = await api.put(`/matches/${matchId}`, updateData);
-      
+
       // Close modal
       setShowTossModal(false);
       setSubmitting(false);
-      
+
       // Show success message
       alert("✅ Toss information saved successfully! Match status updated to LIVE.");
-      
+
       // Refresh all data
       await fetchMatchDetails();
-      
+
       // Reset toss data
       setTossData({
         tossWinner: "",
         electedTo: "",
       });
-      
+
     } catch (err) {
       console.error("Error updating toss:", err);
       console.error("Error details:", err.response?.data);
@@ -100,7 +100,7 @@ export default function ViewMatchDetails() {
   };
 
   const handleViewLive = (id) => navigate(`/viewer/live/${id}`);
-  
+
   const handleEndMatch = async (id) => {
     if (!window.confirm("Mark this match as completed?")) return;
     try {
@@ -151,24 +151,24 @@ export default function ViewMatchDetails() {
   // Helper function to get toss winner name
   const getTossWinnerName = () => {
     if (!tossWinner) return null;
-    
+
     // If tossWinner is an object with name property (populated team)
     if (typeof tossWinner === 'object' && tossWinner.name) {
       return tossWinner.name;
     }
-    
+
     // If tossWinner is just an ID string, try to match with teamA or teamB
     const tossWinnerId = tossWinner.toString ? tossWinner.toString() : tossWinner;
     const teamAId = teamA?._id?.toString();
     const teamBId = teamB?._id?.toString();
-    
+
     if (tossWinnerId === teamAId) {
       return teamA?.name || teamAData?.name || "Team A";
     }
     if (tossWinnerId === teamBId) {
       return teamB?.name || teamBData?.name || "Team B";
     }
-    
+
     return "Unknown Team";
   };
 
@@ -211,13 +211,12 @@ export default function ViewMatchDetails() {
 
         <div className="flex items-center gap-3">
           <span
-            className={`px-3 py-1 rounded-full text-sm font-medium ${
-              status === "upcoming"
+            className={`px-3 py-1 rounded-full text-sm font-medium ${status === "upcoming"
                 ? "bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200"
                 : status === "live"
-                ? "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200"
-                : "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
-            }`}
+                  ? "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200"
+                  : "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+              }`}
           >
             {status}
           </span>
@@ -270,13 +269,13 @@ export default function ViewMatchDetails() {
                 ✕
               </button>
             </div>
-            
+
             {validationError && (
               <div className="mb-4 p-3 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 rounded text-sm">
                 {validationError}
               </div>
             )}
-            
+
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -286,14 +285,13 @@ export default function ViewMatchDetails() {
                   <button
                     type="button"
                     onClick={() => {
-                      setTossData({...tossData, tossWinner: teamA._id});
+                      setTossData({ ...tossData, tossWinner: teamA._id });
                       setValidationError("");
                     }}
-                    className={`flex-1 px-3 py-2 rounded border ${
-                      tossData.tossWinner === teamA._id 
-                        ? "bg-blue-600 text-white border-blue-600" 
+                    className={`flex-1 px-3 py-2 rounded border ${tossData.tossWinner === teamA._id
+                        ? "bg-blue-600 text-white border-blue-600"
                         : "bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300"
-                    }`}
+                      }`}
                     disabled={submitting}
                   >
                     {teamA.name}
@@ -301,14 +299,13 @@ export default function ViewMatchDetails() {
                   <button
                     type="button"
                     onClick={() => {
-                      setTossData({...tossData, tossWinner: teamB._id});
+                      setTossData({ ...tossData, tossWinner: teamB._id });
                       setValidationError("");
                     }}
-                    className={`flex-1 px-3 py-2 rounded border ${
-                      tossData.tossWinner === teamB._id 
-                        ? "bg-blue-600 text-white border-blue-600" 
+                    className={`flex-1 px-3 py-2 rounded border ${tossData.tossWinner === teamB._id
+                        ? "bg-blue-600 text-white border-blue-600"
                         : "bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300"
-                    }`}
+                      }`}
                     disabled={submitting}
                   >
                     {teamB.name}
@@ -324,14 +321,13 @@ export default function ViewMatchDetails() {
                   <button
                     type="button"
                     onClick={() => {
-                      setTossData({...tossData, electedTo: "bat"});
+                      setTossData({ ...tossData, electedTo: "bat" });
                       setValidationError("");
                     }}
-                    className={`flex-1 px-3 py-2 rounded border ${
-                      tossData.electedTo === "bat" 
-                        ? "bg-green-600 text-white border-green-600" 
+                    className={`flex-1 px-3 py-2 rounded border ${tossData.electedTo === "bat"
+                        ? "bg-green-600 text-white border-green-600"
                         : "bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300"
-                    }`}
+                      }`}
                     disabled={submitting}
                   >
                     Bat
@@ -339,14 +335,13 @@ export default function ViewMatchDetails() {
                   <button
                     type="button"
                     onClick={() => {
-                      setTossData({...tossData, electedTo: "bowl"});
+                      setTossData({ ...tossData, electedTo: "bowl" });
                       setValidationError("");
                     }}
-                    className={`flex-1 px-3 py-2 rounded border ${
-                      tossData.electedTo === "bowl" 
-                        ? "bg-green-600 text-white border-green-600" 
+                    className={`flex-1 px-3 py-2 rounded border ${tossData.electedTo === "bowl"
+                        ? "bg-green-600 text-white border-green-600"
                         : "bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300"
-                    }`}
+                      }`}
                     disabled={submitting}
                   >
                     Bowl
@@ -358,11 +353,10 @@ export default function ViewMatchDetails() {
                 <button
                   onClick={handleSubmitToss}
                   disabled={submitting}
-                  className={`flex-1 px-4 py-2 rounded font-medium ${
-                    submitting 
-                      ? "bg-green-400 cursor-not-allowed" 
+                  className={`flex-1 px-4 py-2 rounded font-medium ${submitting
+                      ? "bg-green-400 cursor-not-allowed"
                       : "bg-green-600 hover:bg-green-700"
-                  } text-white`}
+                    } text-white`}
                 >
                   {submitting ? "Submitting..." : "Submit Toss"}
                 </button>

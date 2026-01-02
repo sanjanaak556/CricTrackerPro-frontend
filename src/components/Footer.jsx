@@ -27,7 +27,7 @@ const Footer = () => {
     }
 
     setFooterLoading(true);
-    
+
     // Simulate sending welcome email
     setTimeout(() => {
       // Store in localStorage
@@ -43,7 +43,7 @@ const Footer = () => {
 
       // Show welcome alert
       alert(`🎉 Welcome to Cricket Circle!\n\nA welcome message has been sent to: ${footerEmail}\n\nThank you for subscribing!`);
-      
+
       setFooterEmail('');
       setFooterLoading(false);
     }, 1000);
@@ -52,8 +52,8 @@ const Footer = () => {
   const scrollToSection = (sectionId) => {
     const element = document.getElementById(sectionId);
     if (element) {
-      element.scrollIntoView({ 
-        behavior: 'smooth' 
+      element.scrollIntoView({
+        behavior: 'smooth'
       });
     }
   };
@@ -224,7 +224,7 @@ const Footer = () => {
                   required
                   className="flex-1 px-4 py-2 bg-gray-800 border border-gray-700 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 text-white placeholder-gray-500"
                 />
-                <button 
+                <button
                   type="submit"
                   disabled={footerLoading}
                   className="px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-medium rounded-r-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[100px]"

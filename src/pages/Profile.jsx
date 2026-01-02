@@ -12,7 +12,7 @@ export default function Profile() {
     const loadUser = async () => {
       try {
         const res = await api.get("/users/me");
-        setUser(res.user || res); 
+        setUser(res.user || res);
       } catch (err) {
         console.error(err);
       }
@@ -84,11 +84,10 @@ export default function Profile() {
           <div className="p-4 rounded-lg bg-gray-100 dark:bg-gray-800">
             <p className="text-sm text-gray-500 dark:text-gray-400">Status</p>
             <span
-              className={`px-3 py-1 mt-1 inline-block rounded-full text-sm font-medium ${
-                user.isActive
+              className={`px-3 py-1 mt-1 inline-block rounded-full text-sm font-medium ${user.isActive
                   ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
                   : "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300"
-              }`}
+                }`}
             >
               {user.isActive ? "Active" : "Inactive"}
             </span>

@@ -8,7 +8,7 @@ export default function ViewReportDetails() {
   const [report, setReport] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // 🔥 FIX: Absolute backend URL prevents React Router errors
+  // backend URL prevents React Router errors
   const backendURL = "http://localhost:5000";
   const token = localStorage.getItem("token");
 
@@ -62,8 +62,8 @@ export default function ViewReportDetails() {
             {report.match?.venue?.city
               ? `, ${report.match.venue.city}`
               : report.venue?.city
-              ? `, ${report.venue.city}`
-              : ""}
+                ? `, ${report.venue.city}`
+                : ""}
           </p>
         </div>
 
@@ -111,15 +111,15 @@ export default function ViewReportDetails() {
                       <div className="mt-1 text-sm text-gray-700 dark:text-gray-200">
                         {Array.isArray(inn.batterStats)
                           ? inn.batterStats.map((b, i) => (
-                              <div key={i}>
-                                {b.name} — {b.runs} ({b.balls})
-                              </div>
-                            ))
+                            <div key={i}>
+                              {b.name} — {b.runs} ({b.balls})
+                            </div>
+                          ))
                           : Object.values(inn.batterStats).map((b, i) => (
-                              <div key={i}>
-                                {b.name} — {b.runs} ({b.balls})
-                              </div>
-                            ))}
+                            <div key={i}>
+                              {b.name} — {b.runs} ({b.balls})
+                            </div>
+                          ))}
                       </div>
                     </div>
                   )}
@@ -133,15 +133,15 @@ export default function ViewReportDetails() {
                       <div className="mt-1 text-sm text-gray-700 dark:text-gray-200">
                         {Array.isArray(inn.bowlerStats)
                           ? inn.bowlerStats.map((b, i) => (
-                              <div key={i}>
-                                {b.name} — {b.wickets} wkts ({b.overs} overs)
-                              </div>
-                            ))
+                            <div key={i}>
+                              {b.name} — {b.wickets} wkts ({b.overs} overs)
+                            </div>
+                          ))
                           : Object.values(inn.bowlerStats).map((b, i) => (
-                              <div key={i}>
-                                {b.name} — {b.wickets} wkts ({b.overs} overs)
-                              </div>
-                            ))}
+                            <div key={i}>
+                              {b.name} — {b.wickets} wkts ({b.overs} overs)
+                            </div>
+                          ))}
                       </div>
                     </div>
                   )}
@@ -168,12 +168,11 @@ export default function ViewReportDetails() {
             </div>
           )}
 
-        {/* 🔥 FIXED PDF DOWNLOAD BUTTON */}
+        {/* PDF DOWNLOAD BUTTON */}
         <div>
           <a
-            href={`http://localhost:5000/api/match-summary/${
-              report.matchId || report._id
-            }/pdf?token=${token}`}
+            href={`http://localhost:5000/api/match-summary/${report.matchId || report._id
+              }/pdf?token=${token}`}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-block mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg"

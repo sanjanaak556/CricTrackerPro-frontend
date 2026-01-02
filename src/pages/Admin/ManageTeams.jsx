@@ -258,7 +258,6 @@ export default function ManageTeams() {
   );
 }
 
-/* ------------------------ */
 function InputField({ label, name, type = "text", value, onChange }) {
   return (
     <div>

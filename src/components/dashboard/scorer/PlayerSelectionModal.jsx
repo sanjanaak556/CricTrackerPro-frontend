@@ -81,7 +81,7 @@ export default function PlayerSelectionModal({
         >
           <option value="">
             {isRunOut
-              ? "Select Incoming Batter (if striker out)"
+              ? "Select Incoming Batter (Run out - depends on who is out)"
               : "Select New Batter"}
           </option>
 
@@ -105,7 +105,7 @@ export default function PlayerSelectionModal({
             value={fielder}
             onChange={(e) => setFielder(e.target.value)}
           >
-            <option value="">Select Fielder</option>
+            <option value="">Select Fielder involved in dismissal</option>
             {fieldingPlayers.length > 0 ? (
               fieldingPlayers.map((player) => (
                 <option key={player._id} value={player._id.toString()}>

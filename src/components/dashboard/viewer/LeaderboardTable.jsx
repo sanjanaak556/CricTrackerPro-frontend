@@ -4,7 +4,7 @@ const LeaderboardTable = ({ type, data }) => {
   return (
     <div className="overflow-x-auto rounded-xl shadow border dark:border-gray-700">
       <table className="w-full text-left bg-white dark:bg-gray-900">
-        
+
         {/* Table Header */}
         <thead className="bg-gray-100 dark:bg-gray-800">
           <tr>

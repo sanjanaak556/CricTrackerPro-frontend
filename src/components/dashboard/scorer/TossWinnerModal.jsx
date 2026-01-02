@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import api from '../../../services/api'; 
+import api from '../../../services/api';
 
-const TossWinnerModal = ({ 
-  matchId, 
-  teamA, 
-  teamB, 
-  onClose, 
-  onSuccess 
+const TossWinnerModal = ({
+  matchId,
+  teamA,
+  teamB,
+  onClose,
+  onSuccess
 }) => {
   const [tossData, setTossData] = useState({
     tossWinner: "",
@@ -28,7 +28,7 @@ const TossWinnerModal = ({
 
     setSubmitting(true);
     setValidationError("");
-    
+
     try {
       const updateData = {
         tossWinner: tossData.tossWinner,
@@ -37,15 +37,15 @@ const TossWinnerModal = ({
 
       // Send update request
       await api.put(`/matches/${matchId}/start`, updateData);
-      
+
       // Call success callback
       if (onSuccess) {
         onSuccess({ ...updateData, status: "live" });
       }
-      
+
       // Close modal
       onClose();
-      
+
     } catch (err) {
       console.error("Error updating toss:", err);
       const errorMessage = err.response?.data?.message || err.message || "Failed to update toss";
@@ -81,13 +81,13 @@ const TossWinnerModal = ({
             ✕
           </button>
         </div>
-        
+
         {validationError && (
           <div className="mb-4 p-3 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 rounded text-sm">
             {validationError}
           </div>
         )}
-        
+
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -97,17 +97,16 @@ const TossWinnerModal = ({
               <button
                 type="button"
                 onClick={() => handleTeamSelection(teamA._id)}
-                className={`px-3 py-2 rounded border flex items-center justify-center gap-2 ${
-                  tossData.tossWinner === teamA._id 
-                    ? "bg-blue-600 text-white border-blue-600" 
+                className={`px-3 py-2 rounded border flex items-center justify-center gap-2 ${tossData.tossWinner === teamA._id
+                    ? "bg-blue-600 text-white border-blue-600"
                     : "bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300"
-                }`}
+                  }`}
                 disabled={submitting}
               >
                 {teamA.logo && (
-                  <img 
-                    src={teamA.logo} 
-                    alt={teamA.name} 
+                  <img
+                    src={teamA.logo}
+                    alt={teamA.name}
                     className="w-6 h-6 rounded-full object-cover"
                   />
                 )}
@@ -116,17 +115,16 @@ const TossWinnerModal = ({
               <button
                 type="button"
                 onClick={() => handleTeamSelection(teamB._id)}
-                className={`px-3 py-2 rounded border flex items-center justify-center gap-2 ${
-                  tossData.tossWinner === teamB._id 
-                    ? "bg-blue-600 text-white border-blue-600" 
+                className={`px-3 py-2 rounded border flex items-center justify-center gap-2 ${tossData.tossWinner === teamB._id
+                    ? "bg-blue-600 text-white border-blue-600"
                     : "bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300"
-                }`}
+                  }`}
                 disabled={submitting}
               >
                 {teamB.logo && (
-                  <img 
-                    src={teamB.logo} 
-                    alt={teamB.name} 
+                  <img
+                    src={teamB.logo}
+                    alt={teamB.name}
                     className="w-6 h-6 rounded-full object-cover"
                   />
                 )}
@@ -143,11 +141,10 @@ const TossWinnerModal = ({
               <button
                 type="button"
                 onClick={() => handleDecisionSelection("bat")}
-                className={`px-3 py-2 rounded border ${
-                  tossData.electedTo === "bat" 
-                    ? "bg-green-600 text-white border-green-600" 
+                className={`px-3 py-2 rounded border ${tossData.electedTo === "bat"
+                    ? "bg-green-600 text-white border-green-600"
                     : "bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300"
-                }`}
+                  }`}
                 disabled={submitting}
               >
                 <div className="flex flex-col items-center">
@@ -158,11 +155,10 @@ const TossWinnerModal = ({
               <button
                 type="button"
                 onClick={() => handleDecisionSelection("bowl")}
-                className={`px-3 py-2 rounded border ${
-                  tossData.electedTo === "bowl" 
-                    ? "bg-green-600 text-white border-green-600" 
+                className={`px-3 py-2 rounded border ${tossData.electedTo === "bowl"
+                    ? "bg-green-600 text-white border-green-600"
                     : "bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300"
-                }`}
+                  }`}
                 disabled={submitting}
               >
                 <div className="flex flex-col items-center">
@@ -177,11 +173,10 @@ const TossWinnerModal = ({
             <button
               onClick={handleSubmit}
               disabled={submitting}
-              className={`flex-1 px-4 py-2 rounded font-medium ${
-                submitting 
-                  ? "bg-green-400 cursor-not-allowed" 
+              className={`flex-1 px-4 py-2 rounded font-medium ${submitting
+                  ? "bg-green-400 cursor-not-allowed"
                   : "bg-green-600 hover:bg-green-700"
-              } text-white`}
+                } text-white`}
             >
               {submitting ? "Submitting..." : "Start Match"}
             </button>
@@ -193,7 +188,7 @@ const TossWinnerModal = ({
               Cancel
             </button>
           </div>
-          
+
           <div className="text-xs text-gray-500 dark:text-gray-400 mt-2">
             <p>⚠️ After submitting, match status will change to "LIVE" and you can start scoring.</p>
           </div>

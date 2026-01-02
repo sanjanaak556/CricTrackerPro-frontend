@@ -77,7 +77,7 @@ export default function ManagePlayers() {
 
     try {
       const data = new FormData();
-      
+
       // Append all form data to FormData
       Object.keys(formData).forEach((key) => {
         if (formData[key] !== null && formData[key] !== undefined) {
@@ -274,7 +274,7 @@ export default function ManagePlayers() {
                     onChange={handleInputChange}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
-                  <label 
+                  <label
                     htmlFor="isCaptain"
                     className="ml-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                   >
@@ -307,7 +307,7 @@ export default function ManagePlayers() {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-2 pt-4">
-              <button 
+              <button
                 type="submit"
                 className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex-1 sm:flex-none min-h-[44px]"
               >
@@ -353,7 +353,7 @@ export default function ManagePlayers() {
 
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               {players.map((player) => (
-                <tr 
+                <tr
                   key={player._id}
                   className={player.isCaptain ? "bg-yellow-50 dark:bg-yellow-900/20" : ""}
                 >
@@ -426,18 +426,17 @@ export default function ManagePlayers() {
         {/* Mobile Cards */}
         <div className="md:hidden space-y-4 p-4">
           {players.map((player) => (
-            <div 
-              key={player._id} 
-              className={`bg-gray-50 dark:bg-gray-700 rounded-lg p-4 shadow relative ${
-                player.isCaptain ? "border-l-4 border-yellow-500" : ""
-              }`}
+            <div
+              key={player._id}
+              className={`bg-gray-50 dark:bg-gray-700 rounded-lg p-4 shadow relative ${player.isCaptain ? "border-l-4 border-yellow-500" : ""
+                }`}
             >
               {player.isCaptain && (
                 <div className="absolute top-2 right-2 bg-yellow-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">
                   C
                 </div>
               )}
-              
+
               <div className="flex items-start space-x-3">
                 <div className="relative">
                   <img
@@ -467,7 +466,7 @@ export default function ManagePlayers() {
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-gray-500 dark:text-gray-400">Matches:</span>
@@ -486,7 +485,7 @@ export default function ManagePlayers() {
                       <span className="font-medium dark:text-white">{player.average}</span>
                     </div>
                   </div>
-                  
+
                   <div className="mt-3 flex space-x-3 pt-3 border-t border-gray-200 dark:border-gray-600">
                     <button
                       onClick={() => handleEdit(player)}
@@ -550,10 +549,7 @@ export default function ManagePlayers() {
   );
 }
 
-/* -------------- */
 /* Reusable Inputs */
-/* -------------- */
-
 function InputField({ label, name, value, type = "text", step, onChange }) {
   return (
     <div>
